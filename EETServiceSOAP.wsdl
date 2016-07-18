@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:tns="http://fs.mfcr.cz/eet/schema/v2"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsp="http://www.w3.org/ns/ws-policy"
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                  xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702"
+                  name="EET" targetNamespace="http://fs.mfcr.cz/eet/schema/v2">
+  <wsdl:documentation>
+    Ucel     : Sluzba pro odeslani datove zpravy evidovane trzby
+    Verze    : 2.0
+    Vlastnik : Generalni financni reditelstvi
+  </wsdl:documentation>
+  <wsdl:types>
+    <xsd:schema>
+      <xsd:import namespace="http://fs.mfcr.cz/eet/schema/v2" schemaLocation="EETXMLSchema.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="OdeslaniTrzbyRequest">
+    <wsdl:part element="tns:Trzba" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="OdeslaniTrzbyResponse">
+    <wsdl:part element="tns:Odpoved" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="EET">
+    <wsdl:operation name="OdeslaniTrzby">
+      <wsdl:input message="tns:OdeslaniTrzbyRequest"/>
+      <wsdl:output message="tns:OdeslaniTrzbyResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="EETSOAP" type="tns:EET">
+    <wsp:PolicyReference URI="#wsp-cd3761cf-7408-48c2-be1b-e6ccf07c68cc" />
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="OdeslaniTrzby">
+      <soap:operation soapAction="http://fs.mfcr.cz/eet/OdeslaniTrzby"/>
+      <wsdl:input>
+        <wsp:PolicyReference URI="#wsp-f9a904ba-aea7-4681-8ea5-fd52defa71ee"/>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsp:PolicyReference URI="#wsp-f9a904ba-aea7-4681-8ea5-fd52defa71ee"/>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="EETService">
+    <wsdl:port binding="tns:EETSOAP" name="EETServiceSOAP">
+      <!--
+        Na nasledujicim radku je doplnena adresa "playground"
+        1. "pg.eet.cz" domenove jmeno
+        2. "443" cislo portu
+        Tato adresa plati pouze pro neprodukcni prostredi!
+      -->
+      <soap:address location="https://pg.eet.cz:443/eet/services/EETServiceSOAP/v2"/>
+    </wsdl:port>
+  </wsdl:service>
+  <wsp:Policy wsu:Id="wsp-cd3761cf-7408-48c2-be1b-e6ccf07c68cc">
+    <sp:AsymmetricBinding>
+      <wsp:Policy>
+        <sp:InitiatorToken>
+          <wsp:Policy>
+            <sp:X509Token sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Always">
+              <wsp:Policy>
+                <sp:RequireDirectReference/>
+                <!-- 
+                  Web Services Security X.509 Certificate Token Profile 1.0
+                  http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0.pdf  
+                -->
+                <sp:WssX509V3Token10/>
+              </wsp:Policy>
+            </sp:X509Token>
+          </wsp:Policy>
+        </sp:InitiatorToken>
+        <sp:AlgorithmSuite>
+          <wsp:Policy>
+            <!-- 
+              Algorithm suite : Basic256Sha256
+              Digest : Sha256
+              Encryption : Aes256
+              Symmetric Key Wrap : KwAes256
+              Asymmetric Key Wrap : KwRsaOaep
+              Encryption key Derivation : PSha1L256
+              Signature key Derivation : PSha1L192
+              Minimum Symmetric Key Length : 256
+              http://specs.xmlsoap.org/ws/2005/07/securitypolicy/ws-securitypolicy.pdf
+            -->
+            <sp:Basic256Sha256/>
+          </wsp:Policy>
+        </sp:AlgorithmSuite>
+        <sp:Layout>
+          <wsp:Policy>
+            <!--
+              Defines the layout of the security header. 
+              Lax = Order of contents can vary 
+            -->
+            <sp:Lax/>
+          </wsp:Policy>
+        </sp:Layout>
+      </wsp:Policy>
+    </sp:AsymmetricBinding>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="wsp-f9a904ba-aea7-4681-8ea5-fd52defa71ee">
+    <sp:SignedParts>
+      <sp:Body/>
+    </sp:SignedParts>
+  </wsp:Policy>
+</wsdl:definitions>
