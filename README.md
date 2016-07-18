@@ -2,7 +2,10 @@
 
 ### Závislosti
 Testováno na PHP 5.6
+
 V adresáří vendor se očekává knihovna https://github.com/robrichards/wse-php
+
+Přiložené WSDL, klíč a certifikát je pro neprodukční prostředí (Playground).
 
 ### Licence
 Kód je poskytován tak jak stojí a leží, můžete s ním dělat co chcete, klidně použít i pro EET. Za chyby nezodpovídám.
@@ -10,6 +13,6 @@ Kód je poskytován tak jak stojí a leží, můžete s ním dělat co chcete, k
 ### Reklama
 Komu se nechce do implementace, tak může použít on-line službu <a href="https://www.eetapp.cz/?utm_source=git&utm_medium=link&utm_campaign=eet">EETApp.cz</a>, která má pokročilejší správu účtenek včetně tisku na tiskárnu.
  
-**Bitcoin Donate** 
+### Bitcoin Donate 
 1LZuWFUHeVMrYvZWinxFjjkZtuq56TECot
 
