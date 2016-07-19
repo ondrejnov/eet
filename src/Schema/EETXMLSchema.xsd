@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://fs.mfcr.cz/eet/schema/v2" elementFormDefault="qualified" targetNamespace="http://fs.mfcr.cz/eet/schema/v2" version="2.0">
+
+	<xs:element name="Trzba" type="tns:TrzbaType"/>
+
+	<xs:complexType name="TrzbaType">
+		<xs:sequence>
+			<xs:element maxOccurs="1" minOccurs="1" name="Hlavicka" type="tns:TrzbaHlavickaType"/>
+			<xs:element maxOccurs="1" minOccurs="1" name="Data" type="tns:TrzbaDataType"/>
+			<xs:element maxOccurs="1" minOccurs="1" name="KontrolniKody" type="tns:TrzbaKontrolniKodyType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TrzbaHlavickaType">
+		<xs:attribute name="uuid_zpravy" type="tns:UUIDType" use="required"/>
+		<xs:attribute name="dat_odesl" type="tns:dateTime" use="required"/>
+		<xs:attribute name="prvni_zaslani" type="xs:boolean" use="required"/>
+		<xs:attribute name="overeni" type="xs:boolean" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="TrzbaDataType">
+		<xs:attribute name="dic_popl" type="tns:CZDICType" use="required"/>
+		<xs:attribute name="dic_poverujiciho" type="tns:CZDICType" use="optional"/>
+		<xs:attribute name="id_provoz" type="tns:IdProvozType" use="required"/>
+		<xs:attribute name="id_pokl" type="tns:string" use="required"/>
+		<xs:attribute name="porad_cis" type="tns:string" use="required"/>
+		<xs:attribute name="dat_trzby" type="tns:dateTime" use="required"/>
+		<xs:attribute name="celk_trzba" type="tns:CastkaType" use="required"/>
+		<xs:attribute name="zakl_nepodl_dph" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="zakl_dan1" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="dan1" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="zakl_dan2" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="dan2" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="zakl_dan3" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="dan3" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="cest_sluz" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="pouzit_zboz1" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="pouzit_zboz2" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="pouzit_zboz3" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="urceno_cerp_zuct" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="cerp_zuct" type="tns:CastkaType" use="optional"/>
+		<xs:attribute name="rezim" type="tns:RezimType" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="TrzbaKontrolniKodyType">
+		<xs:sequence>
+			<xs:element maxOccurs="1" minOccurs="1" name="pkp" type="tns:PkpElementType"/>
+			<xs:element maxOccurs="1" minOccurs="1" name="bkp" type="tns:BkpElementType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType mixed="true" name="PkpElementType">
+		<xs:simpleContent>
+			<xs:extension base="tns:PkpType">
+				<xs:attribute name="digest" type="tns:PkpDigestType" use="required"/>
+				<xs:attribute name="cipher" type="tns:PkpCipherType" use="required"/>
+				<xs:attribute name="encoding" type="tns:PkpEncodingType" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType mixed="true" name="BkpElementType">
+		<xs:simpleContent>
+			<xs:extension base="tns:BkpType">
+				<xs:attribute name="digest" type="tns:BkpDigestType" use="required"/>
+				<xs:attribute name="encoding" type="tns:BkpEncodingType" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:element name="Odpoved" type="tns:OdpovedType"/>
+
+	<xs:complexType name="OdpovedType">
+		<xs:sequence>
+			<xs:element maxOccurs="1" minOccurs="1" name="Hlavicka" type="tns:OdpovedHlavickaType"/>
+			<xs:choice maxOccurs="1" minOccurs="1">
+				<xs:element name="Potvrzeni" type="tns:OdpovedPotvrzeniType"/>
+				<xs:element name="Chyba" type="tns:OdpovedChybaType"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="OdpovedHlavickaType">
+		<xs:attribute name="uuid_zpravy" type="tns:UUIDType" use="optional"/>
+		<xs:attribute name="bkp" type="tns:BkpType" use="optional"/>
+		<xs:attribute name="dat_prij" type="tns:dateTime" use="optional"/>
+		<xs:attribute name="dat_odmit" type="tns:dateTime" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="OdpovedPotvrzeniType">
+		<xs:attribute name="fik" type="tns:FikType" use="required"/>
+		<xs:attribute name="test" type="xs:boolean" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType mixed="true" name="OdpovedChybaType">
+		<xs:attribute name="kod" type="xs:int" use="required"/>
+		<xs:attribute name="test" type="xs:boolean" use="optional"/>
+	</xs:complexType>
+
+	<xs:simpleType name="string">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-zA-Z\.,:;/#\-_ ]{1,20}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="dateTime">
+		<xs:restriction base="xs:dateTime">
+			<xs:pattern value="\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(Z|[+\-]\d\d:\d\d)"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CastkaType">
+		<xs:restriction base="xs:decimal">
+			<xs:minExclusive value="-100000000" />
+			<xs:maxExclusive value="100000000" />
+			<xs:pattern value="((0|-?[1-9]\d{0,7})\.\d\d|-0\.(0[1-9]|[1-9]\d))" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="IdProvozType">
+		<xs:restriction base="xs:int">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="999999" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="RezimType">
+		<xs:restriction base="xs:int">
+			<xs:enumeration value="0"/>
+			<xs:enumeration value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="UUIDType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}">
+			</xs:pattern>
+			<xs:length value="36"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CZDICType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="CZ[0-9]{8,10}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PkpType">
+		<xs:restriction base="xs:base64Binary">
+			<xs:length value="256"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PkpDigestType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SHA256"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PkpCipherType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="RSA2048"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PkpEncodingType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="base64"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="BkpType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{8}-[0-9a-fA-F]{8}-[0-9a-fA-F]{8}-[0-9a-fA-F]{8}">
+			</xs:pattern>
+			<xs:length value="44"></xs:length>
+			<xs:whiteSpace value="collapse"></xs:whiteSpace>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="BkpDigestType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SHA1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="BkpEncodingType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="base16"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FikType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}-[0-9a-fA-F]{2}">
+			</xs:pattern>
+			<xs:length value="39"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
