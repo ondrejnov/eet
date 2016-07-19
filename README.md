@@ -8,9 +8,9 @@ $ composer require ondrejnov/eet
 ```
 
 ### Dependencies
-PHP >=5.6
-robrichards/wse-php
-php extensions: php_openssl.dll, php_soap.dll
+- PHP >=5.6
+- robrichards/wse-php
+- php extensions: php_openssl.dll, php_soap.dll
 
 Attached WSDL, key and certificate are intended for non-production usage (Playground).
 
@@ -32,9 +32,9 @@ $ composer require cothema/eet
 ```
 
 ### Závislosti
-PHP >=5.6
-robrichards/wse-php
-php extensions: php_openssl.dll, php_soap.dll
+- PHP >=5.6
+- robrichards/wse-php
+- php extensions: php_openssl.dll, php_soap.dll
 
 Přiložené WSDL, klíč a certifikát jsou pro neprodukční prostředí (Playground).
 
