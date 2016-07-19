@@ -28,7 +28,7 @@ MIT
 Install ondrejnov/eet using  [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require cothema/eet
+$ composer require ondrejnov/eet
 ```
 
 ### Závislosti
