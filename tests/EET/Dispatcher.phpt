@@ -29,7 +29,7 @@ class Dispatcher extends \Tester\TestCase {
      * @return Tested
      */
     private function getTestDispatcher() {
-        return new Tested(DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
+        return new Tested(PLAYGROUND_WSDL, DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
     }
 
     /**
