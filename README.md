@@ -1,15 +1,16 @@
 # Example implementation of EET in PHP
 
 ## Installation
-Install Ondrejnov/eet using  [Composer](http://getcomposer.org/):
+Install ondrejnov/eet using  [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require cothema/eet
+$ composer require ondrejnov/eet
 ```
 
 ### Dependencies
 PHP >=5.6
 robrichards/wse-php
+php extensions: php_openssl.dll, php_soap.dll
 
 Attached WSDL, key and certificate are intended for non-production usage (Playground).
 
@@ -24,7 +25,7 @@ MIT
 # Ukázka implementace EET v PHP
 
 ## Instalace
-Install Ondrejnov/eet using  [Composer](http://getcomposer.org/):
+Install ondrejnov/eet using  [Composer](http://getcomposer.org/):
 
 ```sh
 $ composer require cothema/eet
@@ -33,6 +34,7 @@ $ composer require cothema/eet
 ### Závislosti
 PHP >=5.6
 robrichards/wse-php
+php extensions: php_openssl.dll, php_soap.dll
 
 Přiložené WSDL, klíč a certifikát jsou pro neprodukční prostředí (Playground).
 
