@@ -1,18 +1,52 @@
-# Ukázka implementace EET v PHP.
+# Example implementation of EET in PHP
+
+## Installation
+Install Ondrejnov/eet using  [Composer](http://getcomposer.org/):
+
+```sh
+$ composer require cothema/eet
+```
+
+### Dependencies
+PHP >=5.6
+robrichards/wse-php
+
+Attached WSDL, key and certificate are intended for non-production usage (Playground).
+
+## Example Usage
+Sample codes are located in examples/ folder
+
+### License
+MIT
+
+---
+
+# Ukázka implementace EET v PHP
+
+## Instalace
+Install Ondrejnov/eet using  [Composer](http://getcomposer.org/):
+
+```sh
+$ composer require cothema/eet
+```
 
 ### Závislosti
-Testováno na PHP 5.6
+PHP >=5.6
+robrichards/wse-php
 
-V adresáří vendor se očekává knihovna https://github.com/robrichards/wse-php
+Přiložené WSDL, klíč a certifikát jsou pro neprodukční prostředí (Playground).
 
-Přiložené WSDL, klíč a certifikát je pro neprodukční prostředí (Playground).
+## Ukázka použití
+Ukázky použití naleznete ve složce examples/
 
 ### Licence
-Kód je poskytován tak jak stojí a leží, můžete s ním dělat co chcete, klidně použít i pro EET. Za chyby nezodpovídám.
+MIT
+
+---
 
 ### Reklama
 Komu se nechce do implementace, tak může použít on-line službu <a href="https://www.eetapp.cz/?utm_source=git&utm_medium=link&utm_campaign=eet">EETApp.cz</a>, která má pokročilejší správu účtenek včetně tisku na tiskárnu.
- 
+
 ### Bitcoin Donate 
 1LZuWFUHeVMrYvZWinxFjjkZtuq56TECot
 
