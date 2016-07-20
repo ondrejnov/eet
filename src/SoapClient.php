@@ -7,8 +7,8 @@ class SoapClient extends \SoapClient {
     private $key;
     private $cert;
 
-    public function __construct($key, $cert) {
-        parent::__construct(__DIR__ . '/Schema/EETServiceSOAP.wsdl', ['trace' => 1]);
+    public function __construct($service, $key, $cert) {
+        parent::__construct($service, ['trace' => 1]);
         $this->key = $key;
         $this->cert = $cert;
     }
@@ -29,5 +29,4 @@ class SoapClient extends \SoapClient {
 
         return parent::__doRequest($objWSSE->saveXML(), $location, $saction, $version);
     }
-
 }

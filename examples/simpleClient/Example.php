@@ -6,7 +6,7 @@ use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\Dispatcher;
 use Ondrejnov\EET\Receipt;
 
-$dispatcher = new Dispatcher(DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
+$dispatcher = new Dispatcher(PLAYGROUND_WSDL, DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
 
 // Example receipt
 $r = new Receipt();
@@ -22,7 +22,7 @@ $r->celk_trzba = 1000;
 echo '<h2>---VALID REQUEST---</h2>';
 try {
     $fik = $dispatcher->send($r); // Send request
-    echo sprintf('Returned fik code: %s', $fik); // See response - should be returned
+    echo sprintf('Returned FIK code: %s', $fik); // See response - should be returned
 } catch (ServerException $e) {
     var_dump($e); // See exception
 } catch (\Exception $e) {

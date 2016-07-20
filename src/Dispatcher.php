@@ -22,25 +22,32 @@ class Dispatcher {
      * @var string */
     private $cert;
 
+	/**
+	* WSDL path or URL
+	* @var string */
+	private $service;
+
     /**
      * Receipt for Ministry of Finance
      * @var Receipt */
     private $receipt;
 
     /**
-     * 
+     *
+	 * @param string $service
      * @param string $key
      * @param string $cert
      */
-    public function __construct($key, $cert) {
+    public function __construct($service, $key, $cert) {
         $this->key = $key;
         $this->cert = $cert;
+		$this->service = $service;
         $this->checkRequirements();
     }
 
     private function checkRequirements() {
         if (!class_exists('\SoapClient')) {
-            throw new RequirementsException('Class SoapClient is not defined! Please, allow php extension php_soap.dll in php.ini');
+            throw new RequirementsException('Class SoapClient is not defined! Please, allow soap php extension in php.ini');
         }
     }
 
@@ -104,7 +111,7 @@ class Dispatcher {
         ];
 
 
-        $soapClient = new SoapClient($this->key, $this->cert);
+        $soapClient = new SoapClient($this->service, $this->key, $this->cert);
         return $soapClient->OdeslaniTrzby([
                     'Hlavicka' => $head,
                     'Data' => $body,
@@ -113,6 +120,10 @@ class Dispatcher {
         );
     }
 
+	/**
+	 * @param Receipt $receipt
+	 * @return array
+	 */
     public function getCheckCodes(Receipt $receipt) {
         $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
         $objKey->loadKey($this->key, TRUE);
@@ -142,6 +153,10 @@ class Dispatcher {
         ];
     }
 
+	/**
+	 * @param $error
+	 * @throws ServerException
+	 */
     private function processError($error) {
         if ($error->kod) {
             $msgs = [
