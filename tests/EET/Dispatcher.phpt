@@ -3,6 +3,7 @@
 namespace Ondrejnov\EET\Test;
 
 use Ondrejnov\EET\Dispatcher as Tested;
+use Ondrejnov\EET\Exceptions\ClientException;
 use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\Receipt;
 use Tester\Assert;
@@ -24,8 +25,36 @@ class Dispatcher extends \Tester\TestCase {
         }, ServerException::class);
     }
 
+    public function testGetConnectionTime() {
+        $dispatcher = $this->getTestDispatcher();
+        $dispatcher->trace = TRUE;
+        $dispatcher->send($this->getExampleReceipt());
+        $time = $dispatcher->getConnectionTime();
+        Assert::type('float', $time);
+        Assert::true($time > 0);
+    }
+
+    public function testGetConnectionTimeTillLastRequest() {
+        $dispatcher = $this->getTestDispatcher();
+        $dispatcher->trace = TRUE;
+        $dispatcher->send($this->getExampleReceipt());
+        $time = $dispatcher->getConnectionTime(TRUE);
+        Assert::type('float', $time);
+        Assert::true($time > 0);
+    }
+
+    public function testGetLastResponseTime() {
+        $dispatcher = $this->getTestDispatcher();
+        $dispatcher->trace = TRUE;
+        $dispatcher->send($this->getExampleReceipt());
+        $time = $dispatcher->getLastResponseTime();
+        Assert::type('float', $time);
+        Assert::true($time > 0);
+    }
+
     public function testGetLastRequestSize() {
         $dispatcher = $this->getTestDispatcher();
+        $dispatcher->trace = TRUE;
         $dispatcher->send($this->getExampleReceipt());
         $size = $dispatcher->getLastRequestSize();
         Assert::type('int', $size);
@@ -34,10 +63,19 @@ class Dispatcher extends \Tester\TestCase {
 
     public function testGetLastResponseSize() {
         $dispatcher = $this->getTestDispatcher();
+        $dispatcher->trace = TRUE;
         $dispatcher->send($this->getExampleReceipt());
         $size = $dispatcher->getLastResponseSize();
         Assert::type('int', $size);
         Assert::true($size > 0);
+    }
+
+    public function testTraceNotEnabled() {
+        $dispatcher = $this->getTestDispatcher();
+        $dispatcher->send($this->getExampleReceipt());
+        Assert::exception(function() use ($dispatcher) {
+            $dispatcher->getLastResponseSize();
+        }, ClientException::class);
     }
 
     /**

@@ -7,6 +7,7 @@ use Ondrejnov\EET\Dispatcher;
 use Ondrejnov\EET\Receipt;
 
 $dispatcher = new Dispatcher(PLAYGROUND_WSDL, DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
+$dispatcher->trace = TRUE;
 
 // Example receipt
 $r = new Receipt();
@@ -30,7 +31,7 @@ try {
     var_dump($e); // Fatal error
 }
 
-echo sprintf('Request size: %s bytes | Response size: %s bytes.<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize()); // Size of transferred data
+echo sprintf('Request size: %d bytes | Response size: %d bytes | Response time: %f ms | Connection time: %f ms<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize(), $dispatcher->getLastResponseTime(), $dispatcher->getConnectionTime()); // Size of transferred data
 // Example of error message
 $r->dic_popl = 'x';
 
@@ -44,4 +45,4 @@ try {
     var_dump($e); // Fatal error
 }
 
-echo sprintf('Request size: %s bytes | Response size: %s bytes.<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize()); // Size of transferred data
+echo sprintf('Request size: %d bytes | Response size: %d bytes | Response time: %f ms | Connection time: %f ms<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize(), $dispatcher->getLastResponseTime(), $dispatcher->getConnectionTime()); // Size of transferred data

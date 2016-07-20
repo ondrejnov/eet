@@ -2,6 +2,7 @@
 
 namespace Ondrejnov\EET;
 
+use Ondrejnov\EET\Exceptions\ClientException;
 use Ondrejnov\EET\Exceptions\RequirementsException;
 use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\SoapClient;
@@ -14,18 +15,26 @@ class Dispatcher {
 
     /**
      * Certificate key
-     * @var string */
+     * @var string
+     */
     private $key;
 
     /**
      * Certificate
-     * @var string */
+     * @var string
+     */
     private $cert;
 
     /**
      * WSDL path or URL
-     * @var string */
+     * @var string
+     */
     private $service;
+
+    /**
+     * @var boolean
+     */
+    public $trace;
 
     /**
      *
@@ -61,9 +70,20 @@ class Dispatcher {
 
     /**
      * 
+     * @param boolean $tillLastRequest optional If not set/FALSE connection time till now is returned.
+     * @return float
+     */
+    public function getConnectionTime($tillLastRequest = FALSE) {
+        !$this->trace && $this->throwTraceNotEnabled();
+        return $this->getSoapClient()->__getConnectionTime($tillLastRequest);
+    }
+
+    /**
+     * 
      * @return int
      */
     public function getLastResponseSize() {
+        !$this->trace && $this->throwTraceNotEnabled();
         return mb_strlen($this->getSoapClient()->__getLastResponse(), '8bit');
     }
 
@@ -72,7 +92,25 @@ class Dispatcher {
      * @return int
      */
     public function getLastRequestSize() {
+        !$this->trace && $this->throwTraceNotEnabled();
         return mb_strlen($this->getSoapClient()->__getLastRequest(), '8bit');
+    }
+
+    /**
+     * 
+     * @return float time in ms
+     */
+    public function getLastResponseTime() {
+        !$this->trace && $this->throwTraceNotEnabled();
+        return $this->getSoapClient()->__getLastResponseTime();
+    }
+
+    /**
+     * 
+     * @throws ClientException
+     */
+    private function throwTraceNotEnabled() {
+        throw new ClientException('Trace is not enabled! Set trace property to TRUE.');
     }
 
     /**
@@ -152,7 +190,7 @@ class Dispatcher {
      * @return void
      */
     private function initSoapClient() {
-        $this->soapClient = new SoapClient($this->service, $this->key, $this->cert);
+        $this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace);
     }
 
     /**
