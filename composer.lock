@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c658f2c59e9ea90ac5e176dac443cd80",
-    "content-hash": "db9c721cc0d3a114db5a58c6a7378e8f",
+    "hash": "bea16da66da6f91e179521c07fc5ae30",
+    "content-hash": "7d487855f7afb2f3e7ab23495527aae4",
     "packages": [
         {
             "name": "robrichards/wse-php",
