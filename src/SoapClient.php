@@ -22,6 +22,9 @@ class SoapClient extends \SoapClient {
     /** @var float */
     private $lastResponseEndTime;
 
+    /** @var string */
+    private $lastRequest;
+
     /**
      * 
      * @param string $service
@@ -56,7 +59,7 @@ class SoapClient extends \SoapClient {
 
         $this->traceRequired && $this->lastResponseStartTime = microtime(TRUE);
 
-        $response = parent::__doRequest($objWSSE->saveXML(), $location, $saction, $version);
+        $response = parent::__doRequest($this->lastRequest = $objWSSE->saveXML(), $location, $saction, $version);
 
         $this->traceRequired && $this->lastResponseEndTime = microtime(TRUE);
 
@@ -91,6 +94,13 @@ class SoapClient extends \SoapClient {
             return NULL;
         }
         return microtime(TRUE) - $this->connectionStartTime;
+    }
+
+    /**
+     * @return string
+     */
+    public function __getLastRequest() {
+        return $this->lastRequest;
     }
 
 }
