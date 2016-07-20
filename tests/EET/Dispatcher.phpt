@@ -24,6 +24,22 @@ class Dispatcher extends \Tester\TestCase {
         }, ServerException::class);
     }
 
+    public function testGetLastRequestSize() {
+        $dispatcher = $this->getTestDispatcher();
+        $dispatcher->send($this->getExampleReceipt());
+        $size = $dispatcher->getLastRequestSize();
+        Assert::type('int', $size);
+        Assert::true($size > 0);
+    }
+
+    public function testGetLastResponseSize() {
+        $dispatcher = $this->getTestDispatcher();
+        $dispatcher->send($this->getExampleReceipt());
+        $size = $dispatcher->getLastResponseSize();
+        Assert::type('int', $size);
+        Assert::true($size > 0);
+    }
+
     /**
      * 
      * @return Tested

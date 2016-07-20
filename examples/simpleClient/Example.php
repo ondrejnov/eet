@@ -22,23 +22,26 @@ $r->celk_trzba = 1000;
 echo '<h2>---VALID REQUEST---</h2>';
 try {
     $fik = $dispatcher->send($r); // Send request
-    echo sprintf('Returned FIK code: %s', $fik); // See response - should be returned
+
+    echo sprintf('<b>Returned FIK code: %s</b><br />', $fik); // See response - should be returned
 } catch (ServerException $e) {
     var_dump($e); // See exception
 } catch (\Exception $e) {
     var_dump($e); // Fatal error
 }
 
+echo sprintf('Request size: %s bytes | Response size: %s bytes.<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize()); // Size of transferred data
 // Example of error message
 $r->dic_popl = 'x';
 
 // ServerException should be returned
 echo '<h2>---ERROR REQUEST---</h2>';
 try {
-    $fik = $dispatcher->send($r); // Send request
-    var_dump($fik); // See response
+    var_dump($dispatcher->send($r)); // Send request and see response
 } catch (ServerException $e) {
-    echo sprintf('Error from server of Ministry of Finance: %s', $e->getMessage()); // See exception - should be returned
+    echo sprintf('<b>Error from server of Ministry of Finance: %s</b><br />', $e->getMessage()); // See exception - should be returned
 } catch (\Exception $e) {
     var_dump($e); // Fatal error
 }
+
+echo sprintf('Request size: %s bytes | Response size: %s bytes.<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize()); // Size of transferred data

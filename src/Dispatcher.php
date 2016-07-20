@@ -22,37 +22,32 @@ class Dispatcher {
      * @var string */
     private $cert;
 
-	/**
-	* WSDL path or URL
-	* @var string */
-	private $service;
-
     /**
-     * Receipt for Ministry of Finance
-     * @var Receipt */
-    private $receipt;
+     * WSDL path or URL
+     * @var string */
+    private $service;
 
     /**
      *
-	 * @param string $service
+     * @var SoapClient
+     */
+    private $soapClient;
+
+    /**
+     * 
      * @param string $key
      * @param string $cert
      */
     public function __construct($service, $key, $cert) {
+        $this->service = $service;
         $this->key = $key;
         $this->cert = $cert;
-		$this->service = $service;
         $this->checkRequirements();
-    }
-
-    private function checkRequirements() {
-        if (!class_exists('\SoapClient')) {
-            throw new RequirementsException('Class SoapClient is not defined! Please, allow soap php extension in php.ini');
-        }
     }
 
     /**
      * 
+     * @param string $service
      * @param Receipt $receipt
      * @return boolean|string
      */
@@ -66,16 +61,98 @@ class Dispatcher {
 
     /**
      * 
+     * @return int
+     */
+    public function getLastResponseSize() {
+        return mb_strlen($this->getSoapClient()->__getLastResponse(), '8bit');
+    }
+
+    /**
+     * 
+     * @return int
+     */
+    public function getLastRequestSize() {
+        return mb_strlen($this->getSoapClient()->__getLastRequest(), '8bit');
+    }
+
+    /**
+     * 
+     * @param \Ondrejnov\EET\Receipt $receipt
+     * @return array
+     */
+    public function getCheckCodes(Receipt $receipt) {
+        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+        $objKey->loadKey($this->key, TRUE);
+
+        $arr = [
+            $receipt->dic_popl,
+            $receipt->id_provoz,
+            $receipt->id_pokl,
+            $receipt->porad_cis,
+            $receipt->dat_trzby->format('c'),
+            Format::price($receipt->celk_trzba)
+        ];
+        $sign = $objKey->signData(join('|', $arr));
+
+        return [
+            'pkp' => [
+                '_' => $sign,
+                'digest' => 'SHA256',
+                'cipher' => 'RSA2048',
+                'encoding' => 'base64'
+            ],
+            'bkp' => [
+                '_' => Format::BKB(sha1($sign)),
+                'digest' => 'SHA1',
+                'encoding' => 'base16'
+            ]
+        ];
+    }
+
+    /**
+     * 
      * @param Receipt $receipt
      * @param boolean $check
      * @return boolean|string
      */
     public function send(Receipt $receipt, $check = FALSE) {
+        $this->initSoapClient();
+
         $response = $this->processData($receipt, $check);
 
         isset($response->Chyba) && $this->processError($response->Chyba);
 
         return $check ? TRUE : $response->Potvrzeni->fik;
+    }
+
+    /**
+     * 
+     * @throws RequirementsException
+     * @return void
+     */
+    private function checkRequirements() {
+        if (!class_exists('\SoapClient')) {
+            throw new RequirementsException('Class SoapClient is not defined! Please, allow php extension php_soap.dll in php.ini');
+        }
+    }
+
+    /**
+     * Get (or if not exists: initialize and get) SOAP client.
+     * 
+     * @return SoapClient
+     */
+    private function getSoapClient() {
+        !isset($this->soapClient) && $this->initSoapClient();
+        return $this->soapClient;
+    }
+
+    /**
+     * Require to initialize a new SOAP client for a new request.
+     * 
+     * @return void
+     */
+    private function initSoapClient() {
+        $this->soapClient = new SoapClient($this->service, $this->key, $this->cert);
     }
 
     /**
@@ -110,9 +187,7 @@ class Dispatcher {
             'rezim' => $receipt->rezim
         ];
 
-
-        $soapClient = new SoapClient($this->service, $this->key, $this->cert);
-        return $soapClient->OdeslaniTrzby([
+        return $this->getSoapClient()->OdeslaniTrzby([
                     'Hlavicka' => $head,
                     'Data' => $body,
                     'KontrolniKody' => $this->getCheckCodes($receipt)
@@ -120,43 +195,10 @@ class Dispatcher {
         );
     }
 
-	/**
-	 * @param Receipt $receipt
-	 * @return array
-	 */
-    public function getCheckCodes(Receipt $receipt) {
-        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
-        $objKey->loadKey($this->key, TRUE);
-
-        $arr = [
-            $receipt->dic_popl,
-            $receipt->id_provoz,
-            $receipt->id_pokl,
-            $receipt->porad_cis,
-            $receipt->dat_trzby->format('c'),
-            Format::price($receipt->celk_trzba)
-        ];
-        $sign = $objKey->signData(join('|', $arr));
-
-        return [
-            'pkp' => [
-                '_' => $sign,
-                'digest' => 'SHA256',
-                'cipher' => 'RSA2048',
-                'encoding' => 'base64'
-            ],
-            'bkp' => [
-                '_' => Format::BKB(sha1($sign)),
-                'digest' => 'SHA1',
-                'encoding' => 'base16'
-            ]
-        ];
-    }
-
-	/**
-	 * @param $error
-	 * @throws ServerException
-	 */
+    /**
+     * @param $error
+     * @throws ServerException
+     */
     private function processError($error) {
         if ($error->kod) {
             $msgs = [
