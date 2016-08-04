@@ -34,10 +34,26 @@ class SoapClient extends \SoapClient {
      */
     public function __construct($service, $key, $cert, $trace = FALSE) {
         $this->connectionStartTime = microtime(TRUE);
-        parent::__construct($service, [
-            'exceptions' => TRUE,
-            'trace' => $trace
-        ]);
+        $extraParams = [];
+        if (version_compare(PHP_VERSION, '5.6.4', '>=')) {
+            // PHP 5.6 SOAP 1.2 fix
+            $extraParams["stream_context"] = stream_context_create(
+                array(
+                    'ssl' => array(
+                        'verify_peer'       => false,
+                        'verify_peer_name'  => false
+                    )
+                )
+            );
+        }
+        parent::__construct($service, array_merge(
+                [
+                    'exceptions' => TRUE,
+                    'trace' => $trace,
+                ],
+                $extraParams
+            )
+        );
         $this->key = $key;
         $this->cert = $cert;
         $this->traceRequired = $trace;
