@@ -179,7 +179,7 @@ class Dispatcher {
      * 
      * @return SoapClient
      */
-    private function getSoapClient() {
+	public function getSoapClient() {
         !isset($this->soapClient) && $this->initSoapClient();
         return $this->soapClient;
     }
@@ -190,8 +190,43 @@ class Dispatcher {
      * @return void
      */
     private function initSoapClient() {
-        $this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace);
+    	if ($this->soapClient === NULL) {
+			$this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace);
+		}
     }
+
+    public function prepareData($receipt, $check = FALSE) {
+		$head = [
+			'uuid_zpravy' => $receipt->uuid_zpravy,
+			'dat_odesl' => time(),
+			'prvni_zaslani' => $receipt->prvni_zaslani,
+			'overeni' => $check
+		];
+
+		$body = [
+			'dic_popl' => $receipt->dic_popl,
+			'dic_poverujiciho' => $receipt->dic_poverujiciho,
+			'id_provoz' => $receipt->id_provoz,
+			'id_pokl' => $receipt->id_pokl,
+			'porad_cis' => $receipt->porad_cis,
+			'dat_trzby' => $receipt->dat_trzby->format('c'),
+			'celk_trzba' => Format::price($receipt->celk_trzba),
+			'zakl_nepodl_dph' => Format::price($receipt->zakl_nepodl_dph),
+			'zakl_dan1' => Format::price($receipt->zakl_dan1),
+			'dan1' => Format::price($receipt->dan1),
+			'zakl_dan2' => Format::price($receipt->zakl_dan2),
+			'dan2' => Format::price($receipt->dan2),
+			'zakl_dan3' => Format::price($receipt->zakl_dan3),
+			'dan3' => Format::price($receipt->dan3),
+			'rezim' => $receipt->rezim
+		];
+
+		return [
+			'Hlavicka' => $head,
+			'Data' => $body,
+			'KontrolniKody' => $this->getCheckCodes($receipt)
+		];
+	}
 
     /**
      * 
@@ -200,37 +235,9 @@ class Dispatcher {
      * @return object
      */
     private function processData(Receipt $receipt, $check = FALSE) {
-        $head = [
-            'uuid_zpravy' => $receipt->uuid_zpravy,
-            'dat_odesl' => time(),
-            'prvni_zaslani' => $receipt->prvni_zaslani,
-            'overeni' => $check
-        ];
+        $data = $this->prepareData($receipt, $check);
 
-        $body = [
-            'dic_popl' => $receipt->dic_popl,
-            'dic_poverujiciho' => $receipt->dic_poverujiciho,
-            'id_provoz' => $receipt->id_provoz,
-            'id_pokl' => $receipt->id_pokl,
-            'porad_cis' => $receipt->porad_cis,
-            'dat_trzby' => $receipt->dat_trzby->format('c'),
-            'celk_trzba' => Format::price($receipt->celk_trzba),
-            'zakl_nepodl_dph' => Format::price($receipt->zakl_nepodl_dph),
-            'zakl_dan1' => Format::price($receipt->zakl_dan1),
-            'dan1' => Format::price($receipt->dan1),
-            'zakl_dan2' => Format::price($receipt->zakl_dan2),
-            'dan2' => Format::price($receipt->dan2),
-            'zakl_dan3' => Format::price($receipt->zakl_dan3),
-            'dan3' => Format::price($receipt->dan3),
-            'rezim' => $receipt->rezim
-        ];
-
-        return $this->getSoapClient()->OdeslaniTrzby([
-                    'Hlavicka' => $head,
-                    'Data' => $body,
-                    'KontrolniKody' => $this->getCheckCodes($receipt)
-                        ]
-        );
+        return $this->getSoapClient()->OdeslaniTrzby($data);
     }
 
     /**
