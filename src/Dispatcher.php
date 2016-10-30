@@ -219,6 +219,12 @@ class Dispatcher {
 			'dan2' => Format::price($receipt->dan2),
 			'zakl_dan3' => Format::price($receipt->zakl_dan3),
 			'dan3' => Format::price($receipt->dan3),
+			'cest_sluz' => Format::price($receipt->cest_sluz),
+			'pouzit_zboz1' => Format::price($receipt->pouzit_zboz1),
+			'pouzit_zboz2' => Format::price($receipt->pouzit_zboz2),
+			'pouzit_zboz3' => Format::price($receipt->pouzit_zboz3),
+			'urceno_cerp_zuct' => Format::price($receipt->urceno_cerp_zuct),
+			'cerp_zuct' => Format::price($receipt->cerp_zuct),
 			'rezim' => $receipt->rezim
 		];
 
