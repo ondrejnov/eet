@@ -1,17 +1,14 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-                  xmlns:tns="http://fs.mfcr.cz/eet/schema/v3" 
-                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-                  name="EET" targetNamespace="http://fs.mfcr.cz/eet/schema/v3">
+<wsdl:definitions name="EET" targetNamespace="http://fs.mfcr.cz/eet/schema/v3" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://fs.mfcr.cz/eet/schema/v3" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <wsdl:documentation>
-    Ucel     : Sluzba pro odeslani datove zpravy evidovane trzby 
-    Verze    : 3.0
+    Ucel     : Sluzba pro odeslani datove zpravy evidovane trzby
+    Verze    : 3.1
     Vlastnik : Generalni financni reditelstvi
   </wsdl:documentation>
   <wsdl:types>
     <xsd:schema>
-        <xsd:import namespace="http://fs.mfcr.cz/eet/schema/v3" schemaLocation="EETXMLSchema.xsd"/>
+      <xsd:import namespace="http://fs.mfcr.cz/eet/schema/v3" schemaLocation="EETXMLSchema.xsd"/>
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="OdeslaniTrzbyRequest">
@@ -40,7 +37,7 @@
   </wsdl:binding>
   <wsdl:service name="EETService">
     <wsdl:port binding="tns:EETSOAP" name="EETServiceSOAP">
-      <!-- 
+      <!--
         Na nasledujicim radku je doplnena adresa "playground"
         1. "pg.eet.cz" domenove jmeno
         2. "443" cislo portu
