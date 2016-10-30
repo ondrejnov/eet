@@ -3,6 +3,9 @@
 namespace Ondrejnov\EET;
 
 use Ondrejnov\EET\Exceptions\ClientException;
+use RobRichards\WsePhp\WSSESoap;
+use RobRichards\XMLSecLibs\XMLSecurityDSig;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 class SoapClient extends \SoapClient {
 
@@ -61,12 +64,12 @@ class SoapClient extends \SoapClient {
 		$doc = new \DOMDocument('1.0');
 		$doc->loadXML($request);
 
-		$objWSSE = new \WSSESoap($doc);
+		$objWSSE = new WSSESoap($doc);
 		$objWSSE->addTimestamp();
 
-		$objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+		$objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
 		$objKey->loadKey($this->key, TRUE);
-		$objWSSE->signSoapDoc($objKey, ["algorithm" => \XMLSecurityDSig::SHA256]);
+		$objWSSE->signSoapDoc($objKey, ["algorithm" => XMLSecurityDSig::SHA256]);
 
 		$token = $objWSSE->addBinaryToken(file_get_contents($this->cert));
 		$objWSSE->attachTokentoSig($token);

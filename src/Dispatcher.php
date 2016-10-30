@@ -7,6 +7,7 @@ use Ondrejnov\EET\Exceptions\RequirementsException;
 use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\SoapClient;
 use Ondrejnov\EET\Utils\Format;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 /**
  * Receipt for Ministry of Finance
@@ -119,7 +120,7 @@ class Dispatcher {
      * @return array
      */
     public function getCheckCodes(Receipt $receipt) {
-        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
         $objKey->loadKey($this->key, TRUE);
 
         $arr = [
