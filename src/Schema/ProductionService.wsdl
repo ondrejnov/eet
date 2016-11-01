@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="EET" targetNamespace="http://fs.mfcr.cz/eet/schema/v3" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://fs.mfcr.cz/eet/schema/v3" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:documentation>
+    Ucel     : Sluzba pro odeslani datove zpravy evidovane trzby
+    Verze    : 3.1
+    Vlastnik : Generalni financni reditelstvi
+  </wsdl:documentation>
+  <wsdl:types>
+    <xsd:schema>
+      <xsd:import namespace="http://fs.mfcr.cz/eet/schema/v3" schemaLocation="EETXMLSchema.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="OdeslaniTrzbyRequest">
+    <wsdl:part element="tns:Trzba" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="OdeslaniTrzbyResponse">
+    <wsdl:part element="tns:Odpoved" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="EET">
+    <wsdl:operation name="OdeslaniTrzby">
+      <wsdl:input message="tns:OdeslaniTrzbyRequest"/>
+      <wsdl:output message="tns:OdeslaniTrzbyResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="EETSOAP" type="tns:EET">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="OdeslaniTrzby">
+      <soap:operation soapAction="http://fs.mfcr.cz/eet/OdeslaniTrzby"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="EETService">
+    <wsdl:port binding="tns:EETSOAP" name="EETServiceSOAP">
+      <soap:address location="https://prod.eet.cz:443/eet/services/EETServiceSOAP/v3"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
