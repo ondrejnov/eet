@@ -23,11 +23,12 @@ Sample codes are located in examples/ folder
 ```php
 use Ondrejnov\EET\Dispatcher;
 use Ondrejnov\EET\Receipt;
+use Ondrejnov\EET\Utils\UUID;
 
 $dispatcher = new Dispatcher(PLAYGROUND_WSDL, DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
 
 $r = new Receipt();
-$r->uuid_zpravy = 'b3a09b52-7c87-4014-a496-4c7a53cf9120';
+$r->uuid_zpravy = UUID::v4();
 $r->dic_popl = 'CZ72080043';
 $r->id_provoz = '181';
 $r->id_pokl = '1';
