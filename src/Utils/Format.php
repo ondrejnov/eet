@@ -8,7 +8,7 @@ class Format {
         return number_format($value, 2, '.', '');
     }
 
-    public static function BKB($code) {
+    public static function BKP($code) {
         $r = '';
         for ($i = 0; $i < 40; $i++) {
             if ($i % 8 == 0 && $i != 0) {
