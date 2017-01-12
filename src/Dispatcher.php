@@ -44,7 +44,12 @@ class Dispatcher {
     private $soapClient;
 
     /**
-     * 
+     * @var array [warning code => message]
+     */
+    private $warnings;
+
+    /**
+     *
      * @param string $key
      * @param string $cert
      */
@@ -52,6 +57,7 @@ class Dispatcher {
         $this->service = $service;
         $this->key = $key;
         $this->cert = $cert;
+        $this->warnings = array();
         $this->checkRequirements();
     }
 
@@ -160,12 +166,23 @@ class Dispatcher {
         $response = $this->processData($receipt, $check);
 
         isset($response->Chyba) && $this->processError($response->Chyba);
-
+        isset($response->Varovani) && 
+          $this->warnings = $this->processWarnings($response->Varovani);        
         return $check ? TRUE : $response->Potvrzeni->fik;
+    }
+    
+    /**
+     * Returns array of warnings if the last response contains any, empty array otherwise.
+     * 
+     * @return array [warning code => message]
+     */
+    public function getWarnings()
+    {
+        return $this->warnings;
     }
 
     /**
-     * 
+     *
      * @throws RequirementsException
      * @return void
      */
@@ -266,6 +283,39 @@ class Dispatcher {
             $msg = isset($msgs[$error->kod]) ? $msgs[$error->kod] : '';
             throw new ServerException($msg, $error->kod);
         }
+    }
+
+    /**
+     * @param \stdClass $warnings
+     * @return array [warning code => message]
+     */
+    private function processWarnings($warnings) {
+        $result = array();
+        foreach ($warnings as $warning) {
+            $result[\intval($warning->kod_varov)] 
+              = $this->getWarnigMsg($warning->kod_varov);
+        }
+        return $result;
+    }
+
+    /**
+     * @param int $id warning code
+     * @return string warning message
+     */
+    private function getWarnigMsg($id)
+    {
+      $result = 'Nezname varovani, zkontrolujte technickou specifikaci';
+      $msgs = [
+                1 => 'DIC poplatnika v datove zprave se neshoduje s DIC v certifikatu',
+                2 => 'Chybny format DIC poverujiciho poplatnika',
+                3 => 'Chybna hodnota PKP',
+                4 => 'Datum a cas prijeti trzby je novejsi nez datum a cas prijeti zpravy',
+                5 => 'Datum a cas prijeti trzby je vyrazne v minulosti',
+            ];
+      if (\array_key_exists( $id, $msgs )) {
+          $result = $msgs[$id];
+      }
+      return $result;
     }
 
 }
