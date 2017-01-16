@@ -291,9 +291,14 @@ class Dispatcher {
      */
     private function processWarnings($warnings) {
         $result = array();
-        foreach ($warnings as $warning) {
-            $result[\intval($warning->kod_varov)] 
-              = $this->getWarnigMsg($warning->kod_varov);
+        if(\count($warnings) === 1) {
+            $result[\intval($warnings->kod_varov)]
+                    = $this->getWarnigMsg($warnings->kod_varov);
+        } else {
+            foreach ($warnings as $warning) {
+                $result[\intval($warning->kod_varov)]
+                  = $this->getWarnigMsg($warning->kod_varov);
+            }
         }
         return $result;
     }
