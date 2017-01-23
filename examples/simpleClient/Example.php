@@ -13,7 +13,7 @@ $dispatcher->trace = TRUE;
 // Example receipt
 $r = new Receipt();
 $r->uuid_zpravy = UUID::v4();
-$r->dic_popl = 'CZ72080043';
+$r->dic_popl = 'CZ00000019';
 $r->id_provoz = '181';
 $r->id_pokl = '1';
 $r->porad_cis = '1';

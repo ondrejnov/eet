@@ -92,7 +92,7 @@ class Dispatcher extends \Tester\TestCase {
     private function getExampleReceipt() {
         $r = new Receipt();
         $r->uuid_zpravy = 'b3a09b52-7c87-4014-a496-4c7a53cf9120';
-        $r->dic_popl = 'CZ72080043';
+        $r->dic_popl = 'CZ00000019';
         $r->id_provoz = '181';
         $r->id_pokl = '1';
         $r->porad_cis = '1';
