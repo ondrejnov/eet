@@ -47,6 +47,11 @@ class Dispatcher {
      * @var array [warning code => message]
      */
     private $warnings;
+	
+	/**
+	 * @var \stdClass
+	 */
+	private $wholeResponse;
 
     /**
      *
@@ -162,8 +167,9 @@ class Dispatcher {
      */
     public function send(Receipt $receipt, $check = FALSE) {
         $this->initSoapClient();
-
+		
         $response = $this->processData($receipt, $check);
+		$this->wholeResponse = $response;
 
         isset($response->Chyba) && $this->processError($response->Chyba);
         isset($response->Varovani) && 
@@ -317,5 +323,15 @@ class Dispatcher {
       }
       return $result;
     }
+	
+	/**
+	 * @return \stdClass
+	 */
+	public function getWholeResponse()
+	{
+		return $this->wholeResponse;
+	}
+    
+    
 
 }
