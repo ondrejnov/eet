@@ -292,23 +292,18 @@ class Dispatcher {
     }
 
     /**
-     * @param \stdClass $warnings
+     * @param \stdClass $warning
      * @return array [warning code => message]
      */
-    private function processWarnings($warnings) {
-        $result = array();
-        foreach ($warnings as $warning) {
-            $result[\intval($warning->kod_varov)] 
-              = $this->getWarnigMsg($warning->kod_varov);
-        }
-        return $result;
+    private function processWarnings($warning) {
+		return [(int) $warning->kod_varov => $this->getWarningMsg($warning->kod_varov)];
     }
 
     /**
      * @param int $id warning code
      * @return string warning message
      */
-    private function getWarnigMsg($id)
+    private function getWarningMsg($id)
     {
       $result = 'Nezname varovani, zkontrolujte technickou specifikaci';
       $msgs = [
