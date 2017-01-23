@@ -152,7 +152,7 @@ class Dispatcher {
                 'encoding' => 'base64'
             ],
             'bkp' => [
-                '_' => Format::BKB(sha1($sign)),
+                '_' => Format::BKP(sha1($sign)),
                 'digest' => 'SHA1',
                 'encoding' => 'base16'
             ]
