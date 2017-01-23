@@ -172,8 +172,7 @@ class Dispatcher {
 		$this->wholeResponse = $response;
 
         isset($response->Chyba) && $this->processError($response->Chyba);
-        isset($response->Varovani) && 
-          $this->warnings = $this->processWarnings($response->Varovani);        
+        isset($response->Varovani) && $this->warnings = $this->processWarnings($response->Varovani);
         return $check ? TRUE : $response->Potvrzeni->fik;
     }
     
@@ -292,18 +291,16 @@ class Dispatcher {
     }
 
     /**
-     * @param \stdClass $warnings
+     * @param \stdClass|array $warnings
      * @return array [warning code => message]
      */
     private function processWarnings($warnings) {
         $result = array();
         if(\count($warnings) === 1) {
-            $result[\intval($warnings->kod_varov)]
-                    = $this->getWarnigMsg($warnings->kod_varov);
+            $result[\intval($warnings->kod_varov)] = $this->getWarningMsg($warnings->kod_varov);
         } else {
             foreach ($warnings as $warning) {
-                $result[\intval($warning->kod_varov)]
-                  = $this->getWarnigMsg($warning->kod_varov);
+                $result[\intval($warning->kod_varov)] = $this->getWarningMsg($warning->kod_varov);
             }
         }
         return $result;
@@ -313,7 +310,7 @@ class Dispatcher {
      * @param int $id warning code
      * @return string warning message
      */
-    private function getWarnigMsg($id)
+    private function getWarningMsg($id)
     {
       $result = 'Nezname varovani, zkontrolujte technickou specifikaci';
       $msgs = [
