@@ -52,6 +52,16 @@ class Dispatcher {
 	 * @var \stdClass
 	 */
 	private $wholeResponse;
+    
+    /**
+     * @var string
+     */
+    private $pkpCode;
+    
+    /**
+     * @var string
+     */
+    private $bkpCode;
 
     /**
      *
@@ -142,17 +152,19 @@ class Dispatcher {
             $receipt->dat_trzby->format('c'),
             Format::price($receipt->celk_trzba)
         ];
-        $sign = $objKey->signData(join('|', $arr));
+
+        $this->pkpCode = $objKey->signData(join('|', $arr));
+        $this->bkpCode = Format::BKP(sha1($this->pkpCode));
 
         return [
             'pkp' => [
-                '_' => $sign,
+                '_' => $this->pkpCode,
                 'digest' => 'SHA256',
                 'cipher' => 'RSA2048',
                 'encoding' => 'base64'
             ],
             'bkp' => [
-                '_' => Format::BKP(sha1($sign)),
+                '_' => $this->bkpCode,
                 'digest' => 'SHA1',
                 'encoding' => 'base16'
             ]
@@ -333,6 +345,22 @@ class Dispatcher {
 	{
 		return $this->wholeResponse;
 	}
+
+    /**
+     * 
+     * @return string
+     */
+    public function getPkpCode() {
+        return base64_encode($this->pkpCode);
+    }
+
+    /**
+     * 
+     * @return string
+     */
+    public function getBkpCode() {
+        return $this->bkpCode;
+    }
     
     
 
