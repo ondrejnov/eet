@@ -119,6 +119,24 @@ class Dispatcher {
 
     /**
      *
+     * @return string
+     */
+    public function getLastRequest() {
+        !$this->trace && $this->throwTraceNotEnabled();
+        return $this->getSoapClient()->__getLastRequest();
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getLastResponse() {
+        !$this->trace && $this->throwTraceNotEnabled();
+        return $this->getSoapClient()->__getLastResponse();
+    }
+
+    /**
+     *
      * @throws ClientException
      */
     private function throwTraceNotEnabled() {
@@ -163,9 +181,10 @@ class Dispatcher {
      *
      * @param Receipt $receipt
      * @param boolean $check
+     * @param boolean $fullResponse
      * @return boolean|string
      */
-    public function send(Receipt $receipt, $check = FALSE) {
+    public function send(Receipt $receipt, $check = FALSE, $fullResponse = FALSE) {
         $this->initSoapClient();
 
         $response = $this->processData($receipt, $check);
@@ -173,7 +192,8 @@ class Dispatcher {
 
         isset($response->Chyba) && $this->processError($response->Chyba);
         isset($response->Varovani) && $this->warnings = $this->processWarnings($response->Varovani);
-        return $check ? TRUE : $response->Potvrzeni->fik;
+
+        return $check ? TRUE : ($fullResponse ? $response : $response->Potvrzeni->fik);
     }
 
     /**
