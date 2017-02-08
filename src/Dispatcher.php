@@ -47,7 +47,7 @@ class Dispatcher {
      * @var array [warning code => message]
      */
     private $warnings;
-	
+
 	/**
 	 * @var \stdClass
 	 */
@@ -67,7 +67,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param string $service
      * @param Receipt $receipt
      * @return boolean|string
@@ -81,7 +81,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param boolean $tillLastRequest optional If not set/FALSE connection time till now is returned.
      * @return float
      */
@@ -91,7 +91,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @return int
      */
     public function getLastResponseSize() {
@@ -100,7 +100,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @return int
      */
     public function getLastRequestSize() {
@@ -109,7 +109,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @return float time in ms
      */
     public function getLastResponseTime() {
@@ -118,7 +118,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @throws ClientException
      */
     private function throwTraceNotEnabled() {
@@ -126,7 +126,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param \Ondrejnov\EET\Receipt $receipt
      * @return array
      */
@@ -160,14 +160,14 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param Receipt $receipt
      * @param boolean $check
      * @return boolean|string
      */
     public function send(Receipt $receipt, $check = FALSE) {
         $this->initSoapClient();
-		
+
         $response = $this->processData($receipt, $check);
 		$this->wholeResponse = $response;
 
@@ -175,10 +175,10 @@ class Dispatcher {
         isset($response->Varovani) && $this->warnings = $this->processWarnings($response->Varovani);
         return $check ? TRUE : $response->Potvrzeni->fik;
     }
-    
+
     /**
      * Returns array of warnings if the last response contains any, empty array otherwise.
-     * 
+     *
      * @return array [warning code => message]
      */
     public function getWarnings()
@@ -199,7 +199,7 @@ class Dispatcher {
 
     /**
      * Get (or if not exists: initialize and get) SOAP client.
-     * 
+     *
      * @return SoapClient
      */
 	public function getSoapClient() {
@@ -209,7 +209,7 @@ class Dispatcher {
 
     /**
      * Require to initialize a new SOAP client for a new request.
-     * 
+     *
      * @return void
      */
     private function initSoapClient() {
@@ -258,7 +258,7 @@ class Dispatcher {
 	}
 
     /**
-     * 
+     *
      * @param Receipt $receipt
      * @param boolean $check
      * @return object
@@ -325,7 +325,7 @@ class Dispatcher {
       }
       return $result;
     }
-	
+
 	/**
 	 * @return \stdClass
 	 */
@@ -333,7 +333,5 @@ class Dispatcher {
 	{
 		return $this->wholeResponse;
 	}
-    
-    
 
 }
