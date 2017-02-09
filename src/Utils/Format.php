@@ -9,14 +9,7 @@ class Format {
     }
 
     public static function BKP($code) {
-        $r = '';
-        for ($i = 0; $i < 40; $i++) {
-            if ($i % 8 == 0 && $i != 0) {
-                $r .= '-';
-            }
-            $r .= $code[$i];
-        }
-        return $r;
+        return implode('-', str_split(strtoupper($code), 8));
     }
 
 }
