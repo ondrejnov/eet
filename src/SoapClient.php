@@ -207,6 +207,9 @@ class SoapClient extends \SoapClient {
 	 * @return float
 	 */
 	public function __getLastResponseTime() {
+		if (!$this->lastResponseEndTime || !$this->lastResponseStartTime) {
+			return NULL;
+		}
 		return $this->lastResponseEndTime - $this->lastResponseStartTime;
 	}
 	
