@@ -47,7 +47,7 @@ class Dispatcher {
      * @var array [warning code => message]
      */
     private $warnings;
-	
+
 	/**
 	 * @var \stdClass
 	 */
@@ -77,7 +77,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param string $service
      * @param Receipt $receipt
      * @return boolean|string
@@ -91,7 +91,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param boolean $tillLastRequest optional If not set/FALSE connection time till now is returned.
      * @return float
      */
@@ -101,7 +101,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @return int
      */
     public function getLastResponseSize() {
@@ -110,7 +110,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @return int
      */
     public function getLastRequestSize() {
@@ -119,7 +119,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @return float time in ms
      */
     public function getLastResponseTime() {
@@ -128,7 +128,25 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
+     * @return string
+     */
+    public function getLastRequest() {
+        !$this->trace && $this->throwTraceNotEnabled();
+        return $this->getSoapClient()->__getLastRequest();
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getLastResponse() {
+        !$this->trace && $this->throwTraceNotEnabled();
+        return $this->getSoapClient()->__getLastResponse();
+    }
+
+    /**
+     *
      * @throws ClientException
      */
     private function throwTraceNotEnabled() {
@@ -136,7 +154,7 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param \Ondrejnov\EET\Receipt $receipt
      * @return array
      */
@@ -172,25 +190,27 @@ class Dispatcher {
     }
 
     /**
-     * 
+     *
      * @param Receipt $receipt
      * @param boolean $check
+     * @param boolean $fullResponse
      * @return boolean|string
      */
-    public function send(Receipt $receipt, $check = FALSE) {
+    public function send(Receipt $receipt, $check = FALSE, $fullResponse = FALSE) {
         $this->initSoapClient();
-		
+
         $response = $this->processData($receipt, $check);
 		$this->wholeResponse = $response;
 
         isset($response->Chyba) && $this->processError($response->Chyba);
         isset($response->Varovani) && $this->warnings = $this->processWarnings($response->Varovani);
-        return $check ? TRUE : $response->Potvrzeni->fik;
+
+        return $check ? TRUE : ($fullResponse ? $response : $response->Potvrzeni->fik);
     }
-    
+
     /**
      * Returns array of warnings if the last response contains any, empty array otherwise.
-     * 
+     *
      * @return array [warning code => message]
      */
     public function getWarnings()
@@ -211,7 +231,7 @@ class Dispatcher {
 
     /**
      * Get (or if not exists: initialize and get) SOAP client.
-     * 
+     *
      * @return SoapClient
      */
 	public function getSoapClient() {
@@ -221,7 +241,7 @@ class Dispatcher {
 
     /**
      * Require to initialize a new SOAP client for a new request.
-     * 
+     *
      * @return void
      */
     private function initSoapClient() {
@@ -270,7 +290,7 @@ class Dispatcher {
 	}
 
     /**
-     * 
+     *
      * @param Receipt $receipt
      * @param boolean $check
      * @return object
@@ -337,7 +357,7 @@ class Dispatcher {
       }
       return $result;
     }
-	
+
 	/**
 	 * @return \stdClass
 	 */
@@ -346,22 +366,20 @@ class Dispatcher {
 		return $this->wholeResponse;
 	}
 
-    /**
-     * 
-     * @return string
-     */
-    public function getPkpCode() {
-        return base64_encode($this->pkpCode);
-    }
+  /**
+   * 
+   * @return string
+   */
+  public function getPkpCode() {
+      return base64_encode($this->pkpCode);
+  }
 
-    /**
-     * 
-     * @return string
-     */
-    public function getBkpCode() {
-        return $this->bkpCode;
-    }
-    
-    
+  /**
+   * 
+   * @return string
+   */
+  public function getBkpCode() {
+      return $this->bkpCode;
+  }
 
 }
