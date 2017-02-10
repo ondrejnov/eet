@@ -27,6 +27,12 @@ class Dispatcher {
     private $cert;
 
     /**
+     * Certificate key passphrase
+     * @var string
+     */
+    private $passphrase;
+
+    /**
      * WSDL path or URL
      * @var string
      */
@@ -47,11 +53,11 @@ class Dispatcher {
      * @var array [warning code => message]
      */
     private $warnings;
-	
-	/**
-	 * @var \stdClass
-	 */
-	private $wholeResponse;
+
+    /**
+     * @var \stdClass
+     */
+    private $wholeResponse;
     
     /**
      * @var string
@@ -68,10 +74,11 @@ class Dispatcher {
      * @param string $key
      * @param string $cert
      */
-    public function __construct($service, $key, $cert) {
+    public function __construct($service, $key, $cert, $passphrase = NULL) {
         $this->service = $service;
         $this->key = $key;
         $this->cert = $cert;
+        $this->passphrase = $passphrase;
         $this->warnings = array();
         $this->checkRequirements();
     }
@@ -142,6 +149,9 @@ class Dispatcher {
      */
     public function getCheckCodes(Receipt $receipt) {
         $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+        if ($this->passphrase) {
+            $objKey->passphrase = $this->passphrase;
+        }
         $objKey->loadKey($this->key, TRUE);
 
         $arr = [
@@ -179,9 +189,9 @@ class Dispatcher {
      */
     public function send(Receipt $receipt, $check = FALSE) {
         $this->initSoapClient();
-		
+
         $response = $this->processData($receipt, $check);
-		$this->wholeResponse = $response;
+        $this->wholeResponse = $response;
 
         isset($response->Chyba) && $this->processError($response->Chyba);
         isset($response->Varovani) && $this->warnings = $this->processWarnings($response->Varovani);
@@ -214,7 +224,7 @@ class Dispatcher {
      * 
      * @return SoapClient
      */
-	public function getSoapClient() {
+    public function getSoapClient() {
         !isset($this->soapClient) && $this->initSoapClient();
         return $this->soapClient;
     }
@@ -225,49 +235,49 @@ class Dispatcher {
      * @return void
      */
     private function initSoapClient() {
-    	if ($this->soapClient === NULL) {
-			$this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace);
-		}
+        if ($this->soapClient === NULL) {
+            $this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace, $this->passphrase);
+        }
     }
 
     public function prepareData($receipt, $check = FALSE) {
-		$head = [
-			'uuid_zpravy' => $receipt->uuid_zpravy,
-			'dat_odesl' => time(),
-			'prvni_zaslani' => $receipt->prvni_zaslani,
-			'overeni' => $check
-		];
+        $head = [
+            'uuid_zpravy' => $receipt->uuid_zpravy,
+            'dat_odesl' => time(),
+            'prvni_zaslani' => $receipt->prvni_zaslani,
+            'overeni' => $check
+        ];
 
-		$body = [
-			'dic_popl' => $receipt->dic_popl,
-			'dic_poverujiciho' => $receipt->dic_poverujiciho,
-			'id_provoz' => $receipt->id_provoz,
-			'id_pokl' => $receipt->id_pokl,
-			'porad_cis' => $receipt->porad_cis,
-			'dat_trzby' => $receipt->dat_trzby->format('c'),
-			'celk_trzba' => Format::price($receipt->celk_trzba),
-			'zakl_nepodl_dph' => Format::price($receipt->zakl_nepodl_dph),
-			'zakl_dan1' => Format::price($receipt->zakl_dan1),
-			'dan1' => Format::price($receipt->dan1),
-			'zakl_dan2' => Format::price($receipt->zakl_dan2),
-			'dan2' => Format::price($receipt->dan2),
-			'zakl_dan3' => Format::price($receipt->zakl_dan3),
-			'dan3' => Format::price($receipt->dan3),
-			'cest_sluz' => Format::price($receipt->cest_sluz),
-			'pouzit_zboz1' => Format::price($receipt->pouzit_zboz1),
-			'pouzit_zboz2' => Format::price($receipt->pouzit_zboz2),
-			'pouzit_zboz3' => Format::price($receipt->pouzit_zboz3),
-			'urceno_cerp_zuct' => Format::price($receipt->urceno_cerp_zuct),
-			'cerp_zuct' => Format::price($receipt->cerp_zuct),
-			'rezim' => $receipt->rezim
-		];
+        $body = [
+            'dic_popl' => $receipt->dic_popl,
+            'dic_poverujiciho' => $receipt->dic_poverujiciho,
+            'id_provoz' => $receipt->id_provoz,
+            'id_pokl' => $receipt->id_pokl,
+            'porad_cis' => $receipt->porad_cis,
+            'dat_trzby' => $receipt->dat_trzby->format('c'),
+            'celk_trzba' => Format::price($receipt->celk_trzba),
+            'zakl_nepodl_dph' => Format::price($receipt->zakl_nepodl_dph),
+            'zakl_dan1' => Format::price($receipt->zakl_dan1),
+            'dan1' => Format::price($receipt->dan1),
+            'zakl_dan2' => Format::price($receipt->zakl_dan2),
+            'dan2' => Format::price($receipt->dan2),
+            'zakl_dan3' => Format::price($receipt->zakl_dan3),
+            'dan3' => Format::price($receipt->dan3),
+            'cest_sluz' => Format::price($receipt->cest_sluz),
+            'pouzit_zboz1' => Format::price($receipt->pouzit_zboz1),
+            'pouzit_zboz2' => Format::price($receipt->pouzit_zboz2),
+            'pouzit_zboz3' => Format::price($receipt->pouzit_zboz3),
+            'urceno_cerp_zuct' => Format::price($receipt->urceno_cerp_zuct),
+            'cerp_zuct' => Format::price($receipt->cerp_zuct),
+            'rezim' => $receipt->rezim
+        ];
 
-		return [
-			'Hlavicka' => $head,
-			'Data' => $body,
-			'KontrolniKody' => $this->getCheckCodes($receipt)
-		];
-	}
+        return [
+            'Hlavicka' => $head,
+            'Data' => $body,
+            'KontrolniKody' => $this->getCheckCodes($receipt)
+        ];
+    }
 
     /**
      * 
@@ -337,14 +347,14 @@ class Dispatcher {
       }
       return $result;
     }
-	
-	/**
-	 * @return \stdClass
-	 */
-	public function getWholeResponse()
-	{
-		return $this->wholeResponse;
-	}
+
+    /**
+     * @return \stdClass
+     */
+    public function getWholeResponse()
+    {
+        return $this->wholeResponse;
+    }
 
     /**
      * 
