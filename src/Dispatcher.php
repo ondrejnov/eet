@@ -298,14 +298,14 @@ class Dispatcher {
     private function processError($error) {
         if ($error->kod) {
             $msgs = [
-                -1 => 'Docasna technicka chyba zpracovani – odeslete prosim datovou zpravu pozdeji',
-                2 => 'Kodovani XML neni platne',
-                3 => 'XML zprava nevyhovela kontrole XML schematu',
-                4 => 'Neplatny podpis SOAP zpravy',
-                5 => 'Neplatny kontrolni bezpecnostni kod poplatnika (BKP)',
-                6 => 'DIC poplatnika ma chybnou strukturu',
-                7 => 'Datova zprava je prilis velka',
-                8 => 'Datova zprava nebyla zpracovana kvuli technicke chybe nebo chybe dat',
+                -1 => 'Dočasná technická chyba zpracování – odešlete prosím datovou zprávu později.',
+                2 => 'Kódování XML není platné.',
+                3 => 'XML zpráva nevyhověla kontrole XML schématu.',
+                4 => 'Neplatný podpis SOAP zprávy.',
+                5 => 'Neplatný kontrolní bezpečnostní kód poplatníka (BKP).',
+                6 => 'DIČ poplatníka má chybnou strukturu.',
+                7 => 'Datová zpráva je příliš velká.',
+                8 => 'Datová zpráva nebyla zpracována kvůli technické chybě nebo chybě dat.',
             ];
             $msg = isset($msgs[$error->kod]) ? $msgs[$error->kod] : '';
             throw new ServerException($msg, $error->kod);
@@ -334,13 +334,13 @@ class Dispatcher {
      */
     private function getWarningMsg($id)
     {
-      $result = 'Nezname varovani, zkontrolujte technickou specifikaci';
+      $result = 'Neznámé varování, zkontrolujte technickou specifikaci.';
       $msgs = [
-                1 => 'DIC poplatnika v datove zprave se neshoduje s DIC v certifikatu',
-                2 => 'Chybny format DIC poverujiciho poplatnika',
-                3 => 'Chybna hodnota PKP',
-                4 => 'Datum a cas prijeti trzby je novejsi nez datum a cas prijeti zpravy',
-                5 => 'Datum a cas prijeti trzby je vyrazne v minulosti',
+                1 => 'DIČ poplatníka v datové zprávě se neshoduje s DIČ v certifikátu.',
+                2 => 'Chybný formát DIČ pověřujícího poplatníka.',
+                3 => 'Chybná hodnota PKP.',
+                4 => 'Datum a čas přijetí tržby je novější než datum a čas přijetí zprávy.',
+                5 => 'Datum a čas přijetí tržby je výrazně v minulosti.',
             ];
       if (\array_key_exists( $id, $msgs )) {
           $result = $msgs[$id];
