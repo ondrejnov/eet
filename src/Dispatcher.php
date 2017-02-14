@@ -13,7 +13,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * Receipt for Ministry of Finance
  */
 class Dispatcher {
-
+	
     /**
      * Certificate key
      * @var string
@@ -241,14 +241,14 @@ class Dispatcher {
     }
 
     public function prepareData($receipt, $check = FALSE) {
-        $head = [
+        $head = Format::unsetInvalidKeys([
             'uuid_zpravy' => $receipt->uuid_zpravy,
             'dat_odesl' => time(),
             'prvni_zaslani' => $receipt->prvni_zaslani,
             'overeni' => $check
-        ];
+        ]);
 
-        $body = [
+        $body = Format::unsetInvalidKeys([
             'dic_popl' => $receipt->dic_popl,
             'dic_poverujiciho' => $receipt->dic_poverujiciho,
             'id_provoz' => $receipt->id_provoz,
@@ -270,8 +270,8 @@ class Dispatcher {
             'urceno_cerp_zuct' => Format::price($receipt->urceno_cerp_zuct),
             'cerp_zuct' => Format::price($receipt->cerp_zuct),
             'rezim' => $receipt->rezim
-        ];
-
+        ]);
+		
         return [
             'Hlavicka' => $head,
             'Data' => $body,
@@ -371,7 +371,5 @@ class Dispatcher {
     public function getBkpCode() {
         return $this->bkpCode;
     }
-    
-    
 
 }
