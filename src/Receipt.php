@@ -82,6 +82,6 @@ class Receipt {
     public $cerp_zuct = null;
 
     /** @var int */
-    public $rezim;
+    public $rezim = 0;
 
 }
