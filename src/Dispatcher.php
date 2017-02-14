@@ -13,7 +13,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * Receipt for Ministry of Finance
  */
 class Dispatcher {
-
+	
     /**
      * Certificate key
      * @var string
@@ -271,7 +271,7 @@ class Dispatcher {
             'cerp_zuct' => Format::price($receipt->cerp_zuct),
             'rezim' => $receipt->rezim
         ];
-
+		
         return [
             'Hlavicka' => $head,
             'Data' => $body,
@@ -371,7 +371,5 @@ class Dispatcher {
     public function getBkpCode() {
         return $this->bkpCode;
     }
-    
-    
 
 }
