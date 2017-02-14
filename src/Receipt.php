@@ -14,7 +14,7 @@ class Receipt {
     /**
      * Head part: message identifier
      * @var string */
-    public $uuid_zpravy = FALSE;
+    public $uuid_zpravy;
 
     /**
      * Head part: first sending
@@ -22,66 +22,66 @@ class Receipt {
     public $prvni_zaslani = TRUE;
 
     /** @var string */
-    public $dic_popl = FALSE;
+    public $dic_popl;
 
     /** @var string */
-    public $dic_poverujiciho = FALSE;
+    public $dic_poverujiciho;
 
     /** @var string */
-    public $id_provoz = FALSE;
+    public $id_provoz;
 
     /** @var string */
-    public $id_pokl = FALSE;
+    public $id_pokl;
 
     /** @var string */
-    public $porad_cis = FALSE;
+    public $porad_cis;
 
     /** @var \DateTime */
-    public $dat_trzby = FALSE;
+    public $dat_trzby;
 
     /** @var float */
-    public $celk_trzba = FALSE;
+    public $celk_trzba;
 
     /** @var float */
-    public $zakl_nepodl_dph = FALSE;
+    public $zakl_nepodl_dph = null;
 
     /** @var float */
-    public $zakl_dan1 = FALSE;
+    public $zakl_dan1 = null;
 
     /** @var float */
-    public $dan1 = FALSE;
+    public $dan1 = null;
 
     /** @var float */
-    public $zakl_dan2 = FALSE;
+    public $zakl_dan2 = null;
 
     /** @var float */
-    public $dan2 = FALSE;
+    public $dan2 = null;
 
     /** @var float */
-    public $zakl_dan3 = FALSE;
+    public $zakl_dan3 = null;
 
     /** @var float */
-    public $dan3 = FALSE;
+    public $dan3 = null;
 
     /** @var float */
-    public $cest_sluz = FALSE;
+    public $cest_sluz = null;
 
     /** @var float */
-    public $pouzit_zboz1 = FALSE;
+    public $pouzit_zboz1 = null;
 
     /** @var float */
-    public $pouzit_zboz2 = FALSE;
+    public $pouzit_zboz2 = null;
 
     /** @var float */
-    public $pouzit_zboz3 = FALSE;
+    public $pouzit_zboz3 = null;
 
     /** @var float */
-    public $urceno_cerp_zuct = FALSE;
+    public $urceno_cerp_zuct = null;
 
     /** @var float */
-    public $cerp_zuct = FALSE;
+    public $cerp_zuct = null;
 
     /** @var int */
-    public $rezim = FALSE;
+    public $rezim;
 
 }

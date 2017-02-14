@@ -5,7 +5,7 @@ namespace Ondrejnov\EET\Utils;
 class Format {
 
     public static function price($value) {
-        return $value === false ? $value : number_format($value, 2, '.', '');
+        return $value === null ? $value : number_format($value, 2, '.', '');
     }
 
     public static function BKP($code) {
@@ -16,7 +16,7 @@ class Format {
 		$to_unset = array();
 		
 		foreach ($data as $k => $v) {
-			if ($v === false) $to_unset[] = $k;
+			if ($v === null) $to_unset[] = $k;
 		}
 		
 		foreach ($to_unset as $k) {
