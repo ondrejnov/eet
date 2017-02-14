@@ -43,43 +43,43 @@ class Receipt {
     public $celk_trzba;
 
     /** @var float */
-    public $zakl_nepodl_dph = null;
+    public $zakl_nepodl_dph;
 
     /** @var float */
-    public $zakl_dan1 = null;
+    public $zakl_dan1;
 
     /** @var float */
-    public $dan1 = null;
+    public $dan1;
 
     /** @var float */
-    public $zakl_dan2 = null;
+    public $zakl_dan2;
 
     /** @var float */
-    public $dan2 = null;
+    public $dan2;
 
     /** @var float */
-    public $zakl_dan3 = null;
+    public $zakl_dan3;
 
     /** @var float */
-    public $dan3 = null;
+    public $dan3;
 
     /** @var float */
-    public $cest_sluz = null;
+    public $cest_sluz;
 
     /** @var float */
-    public $pouzit_zboz1 = null;
+    public $pouzit_zboz1;
 
     /** @var float */
-    public $pouzit_zboz2 = null;
+    public $pouzit_zboz2;
 
     /** @var float */
-    public $pouzit_zboz3 = null;
+    public $pouzit_zboz3;
 
     /** @var float */
-    public $urceno_cerp_zuct = null;
+    public $urceno_cerp_zuct;
 
     /** @var float */
-    public $cerp_zuct = null;
+    public $cerp_zuct;
 
     /** @var int */
     public $rezim = 0;
