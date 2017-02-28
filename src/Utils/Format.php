@@ -5,7 +5,9 @@ namespace Ondrejnov\EET\Utils;
 class Format {
 
     public static function price($value) {
-        return number_format($value, 2, '.', '');
+        if ($value !== NULL) {
+            return number_format($value, 2, '.', '');
+        }
     }
 
     public static function BKP($code) {

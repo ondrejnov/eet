@@ -272,6 +272,29 @@ class Dispatcher {
             'rezim' => $receipt->rezim
         ];
 
+        $optionals = [
+            'zakl_nepodl_dph',
+            'zakl_dan1',
+            'dan1',
+            'zakl_dan2',
+            'dan2',
+            'zakl_dan3',
+            'dan3',
+            'cest_sluz',
+            'pouzit_zboz1',
+            'pouzit_zboz2',
+            'pouzit_zboz3',
+            'urceno_cerp_zuct',
+            'cerp_zuct',
+        ];
+        
+        // remove optional keys
+        foreach ($optionals as $key) {
+            if ($body[$key] === NULL) {
+                unset($body[$key]);
+            }
+        }
+
         return [
             'Hlavicka' => $head,
             'Data' => $body,
