@@ -24,6 +24,11 @@ class PKCS12CertificateValidator{
      */
     private $private_key;
 
+    /**
+     * @var Dispatcher
+     */
+    private $dispatcher;
+
 
     function __construct($pkcs12_file, $password){
         //Parse .p12 file
@@ -55,25 +60,30 @@ class PKCS12CertificateValidator{
      * @return bool|string
      */
     public function validate($service, Receipt $receipt, $trace = false){
-        $dispatcher = new Dispatcher($service, $this->private_key, $this->x509, null, false);
-        $dispatcher->trace = $trace;
+        $this->dispatcher = new Dispatcher($service, $this->private_key, $this->x509, null, false);
+        $this->dispatcher->trace = $trace;
 
-        return $dispatcher->send($receipt, true); // Send request as test not real data
+        return $this->dispatcher->send($receipt, true); // Send request as test not real data
     }
 
     /**
-     * return X509 certificate in string format
-     * @return string
+     * @return string X509 certificate in string format
      */
     public function getX509(){
         return $this->x509;
     }
 
     /**
-     * return PrivateKey certificate in string format
-     * @return string
+     * @return string private key certificate in string format
      */
     public function getPrivateKey(){
         return $this->private_key;
+    }
+
+    /**
+     * @return Dispatcher class for accessing warnings, etc...
+     */
+    public function getDispatcher(){
+        return $this->dispatcher;
     }
 }
