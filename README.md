@@ -80,6 +80,13 @@ $r->celk_trzba = 1000;
 
 echo $dispatcher->send($r); // Měl by být vrácen FIK kód
 ```
+Vrácení BKP a PKP
+
+```php
+$dispatcher->getBkpCode(); // BKP
+$dispatcher->getPkpCode();  // PKP	
+```
+
 
 ### Licence
 MIT

@@ -2,8 +2,10 @@
 
 require_once __DIR__ . "/../bootstrap.php";
 
+use Ondrejnov\EET\Exceptions\CertificateValidityException;
 use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\Dispatcher;
+use Ondrejnov\EET\PKCS12CertificateValidator;
 use Ondrejnov\EET\Receipt;
 use Ondrejnov\EET\Utils\UUID;
 
@@ -19,6 +21,21 @@ $r->id_pokl = '1';
 $r->porad_cis = '1';
 $r->dat_trzby = new \DateTime();
 $r->celk_trzba = 1000;
+
+
+echo '<h2>---VALIDATE PKCS12---</h2>';
+try {
+    $validator = new PKCS12CertificateValidator(DIR_CERT . '/EET_CA1_Playground-CZ00000019.p12', 'eet');
+
+    echo sprintf('<b>Request validity: %s</b><br />', $validator->validate(PLAYGROUND_WSDL, $r, true)); // See response - should be returned
+} catch (ServerException $e) {
+    var_dump($e); // See exception
+} catch (CertificateValidityException $e){
+    var_dump($e); // Fatal error
+} catch (\Exception $e) {
+    var_dump($e); // Fatal error
+}
+
 
 // Valid response should be returned
 echo '<h2>---VALID REQUEST---</h2>';

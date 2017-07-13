@@ -5,7 +5,6 @@ namespace Ondrejnov\EET;
 use Ondrejnov\EET\Exceptions\ClientException;
 use Ondrejnov\EET\Exceptions\RequirementsException;
 use Ondrejnov\EET\Exceptions\ServerException;
-use Ondrejnov\EET\SoapClient;
 use Ondrejnov\EET\Utils\Format;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
 
@@ -25,6 +24,9 @@ class Dispatcher {
      * @var string
      */
     private $cert;
+
+
+    private $load_as_file;
 
     /**
      * Certificate key passphrase
@@ -71,14 +73,18 @@ class Dispatcher {
 
     /**
      *
+     * @param $service
      * @param string $key
      * @param string $cert
+     * @param null $passphrase
+     * @param bool $load_as_string
      */
-    public function __construct($service, $key, $cert, $passphrase = NULL) {
+    public function __construct($service, $key, $cert, $passphrase = NULL, $load_as_file = true) {
         $this->service = $service;
         $this->key = $key;
         $this->cert = $cert;
         $this->passphrase = $passphrase;
+        $this->load_as_file = $load_as_file;
         $this->warnings = array();
         $this->checkRequirements();
     }
@@ -152,7 +158,7 @@ class Dispatcher {
         if ($this->passphrase) {
             $objKey->passphrase = $this->passphrase;
         }
-        $objKey->loadKey($this->key, TRUE);
+        $objKey->loadKey($this->key, $this->load_as_file);
 
         $arr = [
             $receipt->dic_popl,
@@ -236,7 +242,7 @@ class Dispatcher {
      */
     private function initSoapClient() {
         if ($this->soapClient === NULL) {
-            $this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace, $this->passphrase);
+            $this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->load_as_file,  $this->trace, $this->passphrase);
         }
     }
 
