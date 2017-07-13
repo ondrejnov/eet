@@ -4,38 +4,92 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bea16da66da6f91e179521c07fc5ae30",
-    "content-hash": "7d487855f7afb2f3e7ab23495527aae4",
+    "content-hash": "4f656fc320b3bd1dc2429be6d968197f",
     "packages": [
         {
             "name": "robrichards/wse-php",
-            "version": "dev-master",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/robrichards/wse-php.git",
-                "reference": "ed6c3cefaa80604de539e69b0affaca67e11195e"
+                "reference": "5dde350ec77930f2ff6c1bb15c4d9e257b1d2496"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/wse-php/zipball/ed6c3cefaa80604de539e69b0affaca67e11195e",
-                "reference": "ed6c3cefaa80604de539e69b0affaca67e11195e",
+                "url": "https://api.github.com/repos/robrichards/wse-php/zipball/5dde350ec77930f2ff6c1bb15c4d9e257b1d2496",
+                "reference": "5dde350ec77930f2ff6c1bb15c4d9e257b1d2496",
                 "shasum": ""
+            },
+            "require": {
+                "php": ">= 5.3",
+                "robrichards/xmlseclibs": "^2.0"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "": "src/"
-                },
-                "files": [
-                    "xmlseclibs.php"
-                ]
+                "psr-4": {
+                    "RobRichards\\WsePhp\\": "src"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD"
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Rob Richards",
+                    "homepage": "http://www.cdatazone.org/",
+                    "role": "Main developer"
+                }
             ],
             "description": "Libraries for adding WS-* support to ext/soap in PHP.",
-            "time": "2016-01-29 10:34:55"
+            "homepage": "https://github.com/robrichards/wse-php",
+            "keywords": [
+                "WS-Security",
+                "soap",
+                "ws-addressing"
+            ],
+            "time": "2017-03-09T16:42:34+00:00"
+        },
+        {
+            "name": "robrichards/xmlseclibs",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/robrichards/xmlseclibs.git",
+                "reference": "53bb1e9cae490a8f93af41bd9df6ea897161ca05"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/53bb1e9cae490a8f93af41bd9df6ea897161ca05",
+                "reference": "53bb1e9cae490a8f93af41bd9df6ea897161ca05",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">= 5.3"
+            },
+            "suggest": {
+                "ext/mcrypt": "MCrypt extension",
+                "ext/openssl": "OpenSSL extension"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "RobRichards\\XMLSecLibs\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "A PHP library for XML Security",
+            "homepage": "https://github.com/robrichards/xmlseclibs",
+            "keywords": [
+                "security",
+                "signature",
+                "xml",
+                "xmldsig"
+            ],
+            "time": "2016-09-08T13:15:00+00:00"
         }
     ],
     "packages-dev": [
@@ -93,7 +147,7 @@
                 "testing",
                 "unit"
             ],
-            "time": "2016-03-19 14:34:02"
+            "time": "2016-03-19T14:34:02+00:00"
         }
     ],
     "aliases": [],
@@ -102,7 +156,8 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.0"
+        "php": ">=5.6.0",
+        "ext-curl": "*"
     },
     "platform-dev": []
 }

@@ -18,6 +18,8 @@ class SoapClient extends \SoapClient {
 	/** @var string */
 	private $cert;
 
+	private $load_as_file;
+
 	/** @var boolean */
 	private $traceRequired;
 
@@ -54,14 +56,16 @@ class SoapClient extends \SoapClient {
 	 */
 	private $lastResponseBody;
 
-	/**
-	 *
-	 * @param string $service
-	 * @param string $key
-	 * @param string $cert
-	 * @param boolean $trace
-	 */
-	public function __construct($service, $key, $cert, $trace = FALSE, $passphrase = NULL) {
+    /**
+     *
+     * @param string $service
+     * @param string $key
+     * @param string $cert
+     * @param boolean $load_as_file
+     * @param boolean $trace
+     * @param null $passphrase
+     */
+	public function __construct($service, $key, $cert, $load_as_file, $trace = FALSE, $passphrase = NULL) {
 		$this->connectionStartTime = microtime(TRUE);
 		parent::__construct($service, [
 			'exceptions' => TRUE,
@@ -69,6 +73,7 @@ class SoapClient extends \SoapClient {
 		]);
 		$this->key = $key;
 		$this->cert = $cert;
+		$this->load_as_file = $load_as_file;
 		$this->traceRequired = $trace;
 		$this->passphrase = $passphrase;
 	}
@@ -85,10 +90,15 @@ class SoapClient extends \SoapClient {
 		if ($this->passphrase) {
 			$objKey->passphrase = $this->passphrase;
 		}
-		$objKey->loadKey($this->key, TRUE);
+		$objKey->loadKey($this->key, $this->load_as_file);
 		$objWSSE->signSoapDoc($objKey, ["algorithm" => XMLSecurityDSig::SHA256]);
 
-		$token = $objWSSE->addBinaryToken(file_get_contents($this->cert));
+		if ($this->load_as_file) {
+            $token = $objWSSE->addBinaryToken(file_get_contents($this->cert));
+        } else {
+            $token = $objWSSE->addBinaryToken($this->cert);
+        }
+
 		$objWSSE->attachTokentoSig($token);
 
 		return $objWSSE->saveXML();
