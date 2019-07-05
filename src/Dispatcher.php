@@ -341,7 +341,7 @@ class Dispatcher {
      */
     private function processWarnings($warnings) {
         $result = array();
-        if(\count($warnings) === 1) {
+        if($warnings instanceof \stdClass) {
             $result[\intval($warnings->kod_varov)] = $this->getWarningMsg($warnings->kod_varov);
         } else {
             foreach ($warnings as $warning) {
