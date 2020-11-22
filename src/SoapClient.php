@@ -175,9 +175,9 @@ class SoapClient extends \SoapClient {
 		// Return?
 		if ($one_way) {
 			return null;
-		} else {
-			return $body;
 		}
+
+		return $body;
 	}
 
 	private function __setCurlOptions($curl, array $options)
@@ -293,9 +293,5 @@ class SoapClient extends \SoapClient {
 	{
 		return $this->lastResponseBody;
 	}
-
-
-
-
 
 }

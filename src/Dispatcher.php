@@ -5,9 +5,9 @@ namespace Ondrejnov\EET;
 use Ondrejnov\EET\Exceptions\ClientException;
 use Ondrejnov\EET\Exceptions\RequirementsException;
 use Ondrejnov\EET\Exceptions\ServerException;
-use Ondrejnov\EET\SoapClient;
 use Ondrejnov\EET\Utils\Format;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
+use function implode;
 
 /**
  * Receipt for Ministry of Finance
@@ -163,7 +163,7 @@ class Dispatcher {
             Format::price($receipt->celk_trzba)
         ];
 
-        $this->pkpCode = $objKey->signData(join('|', $arr));
+        $this->pkpCode = $objKey->signData(implode('|', $arr));
         $this->bkpCode = Format::BKP(sha1($this->pkpCode));
 
         return [
@@ -394,7 +394,5 @@ class Dispatcher {
     public function getBkpCode() {
         return $this->bkpCode;
     }
-    
-    
 
 }
