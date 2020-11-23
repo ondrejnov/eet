@@ -1,56 +1,107 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "hash": "bea16da66da6f91e179521c07fc5ae30",
-    "content-hash": "7d487855f7afb2f3e7ab23495527aae4",
+    "content-hash": "c66b6a278e64af47426a00b37ffdb8ce",
     "packages": [
         {
             "name": "robrichards/wse-php",
-            "version": "dev-master",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/robrichards/wse-php.git",
-                "reference": "ed6c3cefaa80604de539e69b0affaca67e11195e"
+                "reference": "7d2218937008e8badac5d080309bab76431fbc61"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/wse-php/zipball/ed6c3cefaa80604de539e69b0affaca67e11195e",
-                "reference": "ed6c3cefaa80604de539e69b0affaca67e11195e",
+                "url": "https://api.github.com/repos/robrichards/wse-php/zipball/7d2218937008e8badac5d080309bab76431fbc61",
+                "reference": "7d2218937008e8badac5d080309bab76431fbc61",
                 "shasum": ""
+            },
+            "require": {
+                "php": ">= 5.3",
+                "robrichards/xmlseclibs": ">=2.0"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "": "src/"
-                },
-                "files": [
-                    "xmlseclibs.php"
-                ]
+                "psr-4": {
+                    "RobRichards\\WsePhp\\": "src"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD"
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Rob Richards",
+                    "homepage": "http://www.cdatazone.org/",
+                    "role": "Main developer"
+                }
             ],
             "description": "Libraries for adding WS-* support to ext/soap in PHP.",
-            "time": "2016-01-29 10:34:55"
+            "homepage": "https://github.com/robrichards/wse-php",
+            "keywords": [
+                "WS-Security",
+                "soap",
+                "ws-addressing"
+            ],
+            "time": "2017-08-31T09:48:18+00:00"
+        },
+        {
+            "name": "robrichards/xmlseclibs",
+            "version": "3.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/robrichards/xmlseclibs.git",
+                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/f8f19e58f26cdb42c54b214ff8a820760292f8df",
+                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df",
+                "shasum": ""
+            },
+            "require": {
+                "ext-openssl": "*",
+                "php": ">= 5.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "RobRichards\\XMLSecLibs\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "A PHP library for XML Security",
+            "homepage": "https://github.com/robrichards/xmlseclibs",
+            "keywords": [
+                "security",
+                "signature",
+                "xml",
+                "xmldsig"
+            ],
+            "time": "2020-09-05T13:00:25+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "nette/tester",
-            "version": "v1.7.1",
+            "version": "v1.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/tester.git",
-                "reference": "d97534578e8cf66eabe081e7d5eaa4dd527ab0c8"
+                "reference": "c81e276f9809143312c5be51952b1316901b8403"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/tester/zipball/d97534578e8cf66eabe081e7d5eaa4dd527ab0c8",
-                "reference": "d97534578e8cf66eabe081e7d5eaa4dd527ab0c8",
+                "url": "https://api.github.com/repos/nette/tester/zipball/c81e276f9809143312c5be51952b1316901b8403",
+                "reference": "c81e276f9809143312c5be51952b1316901b8403",
                 "shasum": ""
             },
             "require": {
@@ -86,14 +137,20 @@
                     "homepage": "https://nette.org/contributors"
                 }
             ],
-            "description": "An easy-to-use PHP unit testing framework.",
+            "description": "Nette Tester: enjoyable unit testing in PHP with code coverage reporter. ????",
             "homepage": "https://tester.nette.org",
             "keywords": [
+                "Xdebug",
+                "assertions",
+                "clover",
+                "code coverage",
                 "nette",
+                "phpdbg",
+                "phpunit",
                 "testing",
                 "unit"
             ],
-            "time": "2016-03-19 14:34:02"
+            "time": "2018-06-01T09:33:19+00:00"
         }
     ],
     "aliases": [],
@@ -102,7 +159,9 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.0"
+        "php": ">=5.6.0",
+        "ext-curl": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

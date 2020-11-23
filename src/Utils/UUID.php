@@ -6,6 +6,7 @@ namespace Ondrejnov\EET\Utils;
 
 class UUID
 {
+
 	public static function v4()
 	{
 		return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -29,4 +30,5 @@ class UUID
 			mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
 		);
 	}
+
 }

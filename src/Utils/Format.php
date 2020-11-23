@@ -8,6 +8,8 @@ class Format {
         if ($value !== NULL) {
             return number_format($value, 2, '.', '');
         }
+
+        return null;
     }
 
     public static function BKP($code) {

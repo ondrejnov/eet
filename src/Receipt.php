@@ -2,10 +2,6 @@
 
 namespace Ondrejnov\EET;
 
-use Ondrejnov\EET\Exceptions\ServerException;
-use Ondrejnov\EET\SoapClient;
-use Ondrejnov\EET\Utils\Format;
-
 /**
  * Receipt for Ministry of Finance
  */
