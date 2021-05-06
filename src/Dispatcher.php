@@ -214,8 +214,14 @@ class Dispatcher {
      * @return void
      */
     private function checkRequirements() {
-        if (!class_exists('\SoapClient')) {
-            throw new RequirementsException('Class SoapClient is not defined! Please, allow php extension php_soap.dll in php.ini');
+        if (!extension_loaded('soap')) {
+            throw new RequirementsException("Extension 'soap' is not loaded! Please, enable it in php.ini");
+        }
+        if (!extension_loaded('curl')) {
+            throw new RequirementsException("Extension 'curl' is not loaded! Please, enable it in php.ini");
+        }
+        if (!extension_loaded('mbstring')) {
+            throw new RequirementsException("Extension 'mbstring' is not loaded! Please, enable it in php.ini");
         }
     }
 

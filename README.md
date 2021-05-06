@@ -13,7 +13,7 @@ $ composer require ondrejnov/eet
 ### Dependencies
 - PHP >=5.6
 - robrichards/wse-php
-- php extensions: php_openssl.dll, php_soap.dll
+- php extensions: php_openssl.dll, php_curl.dll, php_mbstring.dll, php_soap.dll
 
 Attached WSDL, key and certificate are intended for non-production usage (Playground).
 
