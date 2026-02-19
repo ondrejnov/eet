@@ -83,12 +83,3 @@ echo $dispatcher->send($r); // Měl by být vrácen FIK kód
 
 ### Licence
 MIT
-
----
-
-### Reklama
-Komu se nechce do implementace, tak může použít on-line službu <a href="https://www.eetapp.cz/?utm_source=git&utm_medium=link&utm_campaign=eet">EETApp.cz</a>, která má pokročilejší správu účtenek včetně tisku na tiskárnu.
-
-### Bitcoin Donate 
-1LZuWFUHeVMrYvZWinxFjjkZtuq56TECot
-
