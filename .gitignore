@@ -1,5 +1,6 @@
 nbproject/*
 vendor/
+composer.lock
 .idea
 _cert/
 tests/output/

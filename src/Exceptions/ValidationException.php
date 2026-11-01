@@ -9,10 +9,14 @@ namespace Ondrejnov\EET\Exceptions;
  */
 class ValidationException extends ClientException
 {
+    /** @var list<string> */
+    private $errors;
+
     /** @param list<string> $errors */
-    public function __construct(private array $errors)
+    public function __construct(array $errors)
     {
         parent::__construct(implode('; ', $errors));
+        $this->errors = $errors;
     }
 
     /** @return list<string> */

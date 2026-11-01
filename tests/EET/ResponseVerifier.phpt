@@ -10,10 +10,10 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 $verifier = new ResponseVerifier();
-$assertRejected = static function (string $xml, string $reason) use ($verifier): void {
+$assertRejected = static function (string $xml, string $reason) use ($verifier) {
     $exception = Assert::exception(
-        static fn () => $verifier->verifySignature(loadXml($xml)),
-        ResponseVerificationException::class,
+        static function () use ($verifier, $xml) { return $verifier->verifySignature(loadXml($xml)); },
+        ResponseVerificationException::class
     );
     Assert::contains($reason, $exception->getMessage());
 };
@@ -29,18 +29,18 @@ $certificate = $verifier->verifySignature(loadXml($confirmation));
 // Identity of the signing certificate.
 (new ResponseVerifier(null, 'Generální finanční ředitelství'))->verifyCertificate($certificate);
 Assert::exception(
-    static fn () => (new ResponseVerifier(null, 'Někdo jiný'))->verifyCertificate($certificate),
+    static function () use ($certificate) { return (new ResponseVerifier(null, 'Někdo jiný'))->verifyCertificate($certificate); },
     ResponseVerificationException::class,
-    '~unexpected organization~',
+    '~unexpected organization~'
 );
 
 // A certificate from an unknown authority with the expected organization is refused.
 $attacker = createKeyPairFiles('CZ00000019', 'Generální finanční ředitelství');
 Assert::exception(
-    static fn () => (new ResponseVerifier(FILE_CA_BUNDLE, 'Generální finanční ředitelství'))
-        ->verifyCertificate(openssl_x509_read(file_get_contents($attacker['cert']))),
+    static function () use ($attacker) { return (new ResponseVerifier(FILE_CA_BUNDLE, 'Generální finanční ředitelství'))
+        ->verifyCertificate(openssl_x509_read(file_get_contents($attacker['cert']))); },
     ResponseVerificationException::class,
-    '~untrusted authority~',
+    '~untrusted authority~'
 );
 
 // Changed content.

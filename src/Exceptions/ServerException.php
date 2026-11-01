@@ -12,14 +12,25 @@ use Ondrejnov\EET\Response;
 class ServerException extends \Exception
 {
     /** Error codes of temporary failures, the message should be sent again later. */
-    private const RETRYABLE_CODES = [-1, 8];
+    const RETRYABLE_CODES = [-1, 8];
 
-    public function __construct(string $message, int $code, private ?Response $response = null, ?\Throwable $previous = null)
+    /** @var Response|null */
+    private $response;
+
+    /**
+     * @param Response|null $response
+     * @param \Throwable|null $previous
+     */
+    public function __construct(string $message, int $code, $response = null, $previous = null)
     {
         parent::__construct($message, $code, $previous);
+        $this->response = $response;
     }
 
-    public function getResponse(): ?Response
+    /**
+     * @return Response|null
+     */
+    public function getResponse()
     {
         return $this->response;
     }

@@ -21,13 +21,13 @@ use Ondrejnov\EET\Utils\UUID;
  */
 class Dispatcher
 {
-    public const PLAYGROUND_URL = 'https://pg.trzbyeet.gov.cz/eet/services/EETServiceSOAP/v4';
+    const PLAYGROUND_URL = 'https://pg.trzbyeet.gov.cz/eet/services/EETServiceSOAP/v4';
 
-    private const SOAP_ACTION = 'http://fs.gov.cz/eet/OdeslaniTrzby';
-    private const LOCAL_TIMEZONE = 'Europe/Prague';
-    private const POK_MASK = '/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}-[0-9a-fA-F]{2}$/D';
+    const SOAP_ACTION = 'http://fs.gov.cz/eet/OdeslaniTrzby';
+    const LOCAL_TIMEZONE = 'Europe/Prague';
+    const POK_MASK = '/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}-[0-9a-fA-F]{2}$/D';
 
-    private const ERROR_MESSAGES = [
+    const ERROR_MESSAGES = [
         -1 => 'Dočasná technická chyba zpracování – odešlete prosím datovou zprávu později.',
         2 => 'Kódování XML není platné.',
         3 => 'XML zpráva nevyhověla kontrole XML schématu.',
@@ -37,19 +37,35 @@ class Dispatcher
         8 => 'Datová zpráva nebyla zpracována kvůli technické chybě nebo chybě dat.',
     ];
 
-    private Transport $transport;
+    /** @var string */
+    private $service;
 
-    private MessageSigner $signer;
+    /** @var Certificate */
+    private $certificate;
 
-    private ?string $lastRequest = null;
+    /** @var ResponseVerifier */
+    private $verifier;
 
-    private ?string $lastResponseBody = null;
+    /** @var Transport */
+    private $transport;
 
-    private ?Response $lastResponse = null;
+    /** @var MessageSigner */
+    private $signer;
 
-    private ?string $lastUuid = null;
+    /** @var string|null */
+    private $lastRequest;
 
-    private ?float $lastResponseTime = null;
+    /** @var string|null */
+    private $lastResponseBody;
+
+    /** @var Response|null */
+    private $lastResponse;
+
+    /** @var string|null */
+    private $lastUuid;
+
+    /** @var float|null */
+    private $lastResponseTime;
 
     /**
      * @param string $service URL of the service, e.g. Dispatcher::PLAYGROUND_URL
@@ -57,14 +73,11 @@ class Dispatcher
      * @param ResponseVerifier|null $verifier verifier of signed confirmations, ResponseVerifier::forPlayground() by default
      * @param Transport|null $transport HTTP client, CurlTransport by default
      */
-    public function __construct(
-        private string $service,
-        private Certificate $certificate,
-        private ?ResponseVerifier $verifier = null,
-        ?Transport $transport = null,
-    ) {
-        $this->verifier ??= ResponseVerifier::forPlayground();
-        $this->transport = $transport ?? new CurlTransport();
+    public function __construct(string $service, Certificate $certificate, $verifier = null, $transport = null)
+    {
+        $this->service = $service;
+        $this->certificate = $certificate;
+        $this->setCollaborators($verifier ?? ResponseVerifier::forPlayground(), $transport ?? new CurlTransport());
         $this->signer = new MessageSigner();
     }
 
@@ -103,7 +116,7 @@ class Dispatcher
             return $this->process($receipt, true)->isVerified();
         } catch (ResponseVerificationException $e) {
             throw $e;
-        } catch (ServerException) {
+        } catch (ServerException $e) {
             return false;
         }
     }
@@ -123,10 +136,13 @@ class Dispatcher
      */
     public function getWarnings(): array
     {
-        return $this->lastResponse?->warnings ?? [];
+        return $this->lastResponse === null ? [] : $this->lastResponse->warnings;
     }
 
-    public function getLastResponse(): ?Response
+    /**
+     * @return Response|null
+     */
+    public function getLastResponse()
     {
         return $this->lastResponse;
     }
@@ -134,7 +150,7 @@ class Dispatcher
     /**
      * @return string|null signed SOAP message sent by the last call
      */
-    public function getLastRequest(): ?string
+    public function getLastRequest()
     {
         return $this->lastRequest;
     }
@@ -142,7 +158,7 @@ class Dispatcher
     /**
      * @return string|null UUID of the message sent by the last call
      */
-    public function getLastUuid(): ?string
+    public function getLastUuid()
     {
         return $this->lastUuid;
     }
@@ -150,7 +166,7 @@ class Dispatcher
     /**
      * @return string|null raw body of the last HTTP response
      */
-    public function getLastResponseBody(): ?string
+    public function getLastResponseBody()
     {
         return $this->lastResponseBody;
     }
@@ -158,7 +174,7 @@ class Dispatcher
     /**
      * @return float|null duration of the last HTTP call in seconds
      */
-    public function getLastResponseTime(): ?float
+    public function getLastResponseTime()
     {
         return $this->lastResponseTime;
     }
@@ -171,6 +187,16 @@ class Dispatcher
     public function getLastResponseSize(): int
     {
         return strlen((string) $this->lastResponseBody);
+    }
+
+    /**
+     * Keeps the native type check of the optional constructor arguments, which cannot be declared
+     * as nullable in a way valid for both PHP 7.0 and 8.4+. A wrong type must fail before anything is sent.
+     */
+    private function setCollaborators(ResponseVerifier $verifier, Transport $transport)
+    {
+        $this->verifier = $verifier;
+        $this->transport = $transport;
     }
 
     private function process(Receipt $receipt, bool $check): Response
@@ -195,7 +221,7 @@ class Dispatcher
             throw new ServerException(
                 $response->errorMessage ?: (self::ERROR_MESSAGES[$response->errorCode] ?? 'Unknown EET error.'),
                 $response->errorCode,
-                $response,
+                $response
             );
         }
 
@@ -286,15 +312,15 @@ class Dispatcher
         }
 
         $response = new Response(
-            uuid: $this->attribute($header, 'uuid_zpravy'),
-            receivedAt: $this->attribute($header, 'dat_prij'),
-            rejectedAt: $this->attribute($header, 'dat_odmit'),
-            pok: $this->attribute($confirmation, 'pok'),
-            errorCode: $error === null ? null : (int) $error->getAttribute('kod'),
-            errorMessage: $error === null ? null : trim($error->textContent),
-            test: in_array($this->attribute($confirmation ?? $error, 'test'), ['true', '1'], true),
-            warnings: $warnings,
-            transactionId: $http->transactionId,
+            $this->attribute($header, 'uuid_zpravy'),
+            $this->attribute($header, 'dat_prij'),
+            $this->attribute($header, 'dat_odmit'),
+            $this->attribute($confirmation, 'pok'),
+            $error === null ? null : (int) $error->getAttribute('kod'),
+            $error === null ? null : trim($error->textContent),
+            in_array($this->attribute($confirmation ?? $error, 'test'), ['true', '1'], true),
+            $warnings,
+            $http->transactionId
         );
 
         if ($response->isConfirmed()) {
@@ -304,7 +330,7 @@ class Dispatcher
         return $response;
     }
 
-    private function verifyConfirmation(\DOMDocument $document, Response $response): void
+    private function verifyConfirmation(\DOMDocument $document, Response $response)
     {
         try {
             $this->verifier->verify($document);
@@ -325,7 +351,12 @@ class Dispatcher
     {
         $document = new \DOMDocument();
         $previous = libxml_use_internal_errors(true);
+        // libxml older than 2.9 loads external entities by default, the function is deprecated on PHP 8 and not needed there.
+        $previousLoader = LIBXML_VERSION < 20900 ? libxml_disable_entity_loader(true) : null;
         $loaded = $http->body !== '' && $document->loadXML($http->body, LIBXML_NONET);
+        if ($previousLoader !== null) {
+            libxml_disable_entity_loader($previousLoader);
+        }
         libxml_clear_errors();
         libxml_use_internal_errors($previous);
 
@@ -336,7 +367,12 @@ class Dispatcher
         return $document;
     }
 
-    private function attribute(?\DOMNode $element, string $name): ?string
+    /**
+     * @param \DOMNode|null $element
+     *
+     * @return string|null
+     */
+    private function attribute($element, string $name)
     {
         return $element instanceof \DOMElement && $element->hasAttribute($name)
             ? $element->getAttribute($name)

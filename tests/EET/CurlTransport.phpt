@@ -12,14 +12,14 @@ $transport = new CurlTransport(500, 500);
 
 // HTTPS is mandatory, an unencrypted connection is refused before anything is sent.
 Assert::exception(
-    static fn () => $transport->post('http://127.0.0.1:1/', '<x/>', 'action'),
+    static function () use ($transport) { return $transport->post('http://127.0.0.1:1/', '<x/>', 'action'); },
     TransportException::class,
     '~http~i',
-    CURLE_UNSUPPORTED_PROTOCOL,
+    CURLE_UNSUPPORTED_PROTOCOL
 );
 
 // A connection error is reported as a transport problem.
 Assert::exception(
-    static fn () => $transport->post('https://127.0.0.1:1/', '<x/>', 'action'),
-    TransportException::class,
+    static function () use ($transport) { return $transport->post('https://127.0.0.1:1/', '<x/>', 'action'); },
+    TransportException::class
 );

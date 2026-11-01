@@ -24,22 +24,36 @@ Assert::notContains('OpenSSLAsymmetricKey', $dump);
 // Passphrase protected key.
 $protected = createKeyPairFiles('CZ00000019', 'Test', 'secret');
 Assert::same('CZ00000019', Certificate::fromPem($protected['key'], $protected['cert'], 'secret')->getEic());
-Assert::exception(static fn () => Certificate::fromPem($protected['key'], $protected['cert'], 'wrong'), ClientException::class);
+Assert::exception(static function () use ($protected) { return Certificate::fromPem($protected['key'], $protected['cert'], 'wrong'); }, ClientException::class);
 
 // A key of a different certificate.
 $other = createKeyPairFiles();
-Assert::exception(static fn () => Certificate::fromPem($other['key'], $files['cert']), ClientException::class, '~does not belong~');
+Assert::exception(static function () use ($other, $files) { return Certificate::fromPem($other['key'], $files['cert']); }, ClientException::class, '~does not belong~');
 
 // Missing files.
-Assert::exception(static fn () => Certificate::fromPem('/nonexistent', $files['cert']), ClientException::class, '~Cannot read file~');
-Assert::exception(static fn () => Certificate::fromPkcs12('/nonexistent', 'x'), ClientException::class, '~Cannot read file~');
+Assert::exception(static function () use ($files) { return Certificate::fromPem('/nonexistent', $files['cert']); }, ClientException::class, '~Cannot read file~');
+Assert::exception(static function () { return Certificate::fromPkcs12('/nonexistent', 'x'); }, ClientException::class, '~Cannot read file~');
 
 // PKCS#12 with a modern cipher.
 $p12File = tempnam(sys_get_temp_dir(), 'eet');
 openssl_pkcs12_export_to_file(file_get_contents($files['cert']), $p12File, file_get_contents($files['key']), 'secret');
 Assert::same('CZ8551015704', Certificate::fromPkcs12($p12File, 'secret')->getEic());
-Assert::exception(static fn () => Certificate::fromPkcs12($p12File, 'wrong'), ClientException::class, '~Cannot read PKCS#12~');
+Assert::exception(static function () use ($p12File) { return Certificate::fromPkcs12($p12File, 'wrong'); }, ClientException::class, '~Cannot read PKCS#12~');
 unlink($p12File);
+
+// Secrets are hidden in stack traces where the language supports it.
+if (PHP_VERSION_ID >= 80200 && !ini_get('zend.exception_ignore_args')) {
+    foreach ([
+        Assert::exception(static function () { Certificate::fromPkcs12('/nonexistent', 'secret'); }, ClientException::class),
+        Assert::exception(static function () use ($protected) { Certificate::fromPem($protected['key'], '/nonexistent', 'secret'); }, ClientException::class),
+    ] as $exception) {
+        foreach ($exception->getTrace() as $frame) {
+            if (in_array($frame['function'], ['fromPkcs12', 'fromPem'], true)) {
+                Assert::notContains('secret', print_r($frame['args'], true));
+            }
+        }
+    }
+}
 
 // PKCS#12 published for the playground: either it loads, or the error explains the OpenSSL 3 limitation.
 $playground = DIR_CERT . '/CA_EET-Playground-CZ00000019.p12';

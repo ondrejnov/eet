@@ -14,14 +14,20 @@ use Ondrejnov\EET\Exceptions\TransportException;
  */
 final class CurlTransport implements Transport
 {
+    /** @var int */
+    private $timeoutMs;
+
+    /** @var int */
+    private $connectTimeoutMs;
+
     /**
      * @param int $timeoutMs total limit of one request in milliseconds
      * @param int $connectTimeoutMs limit for establishing the connection in milliseconds
      */
-    public function __construct(
-        private int $timeoutMs = 2500,
-        private int $connectTimeoutMs = 2000,
-    ) {
+    public function __construct(int $timeoutMs = 2500, int $connectTimeoutMs = 2000)
+    {
+        $this->timeoutMs = $timeoutMs;
+        $this->connectTimeoutMs = $connectTimeoutMs;
     }
 
     public function post(string $url, string $body, string $soapAction): HttpResponse

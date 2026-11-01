@@ -13,7 +13,11 @@ use Ondrejnov\EET\Response;
  */
 class ResponseVerificationException extends ServerException
 {
-    public function __construct(string $message, ?Response $response = null, ?\Throwable $previous = null)
+    /**
+     * @param Response|null $response
+     * @param \Throwable|null $previous
+     */
+    public function __construct(string $message, $response = null, $previous = null)
     {
         parent::__construct($message, 0, $response, $previous);
     }

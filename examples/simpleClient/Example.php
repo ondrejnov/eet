@@ -47,7 +47,7 @@ echo sprintf(
     $dispatcher->getLastRequestSize(),
     $dispatcher->getLastResponseSize(),
     $dispatcher->getLastResponseTime() * 1000,
-    $dispatcher->getLastResponse()?->transactionId,
+    $dispatcher->getLastResponse() === null ? '-' : $dispatcher->getLastResponse()->transactionId
 );
 
 echo "--- Critical error ---\n";

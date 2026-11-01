@@ -14,14 +14,20 @@ use Ondrejnov\EET\Exceptions\ResponseVerificationException;
  */
 final class ResponseVerifier
 {
+    /** @var string|null */
+    private $caFile;
+
+    /** @var string|null */
+    private $expectedOrganization;
+
     /**
      * @param string|null $caFile PEM bundle with the issuers of the signing certificate, NULL skips the trust check
      * @param string|null $expectedOrganization required O of the signing certificate, NULL skips the check
      */
-    public function __construct(
-        private ?string $caFile = null,
-        private ?string $expectedOrganization = null,
-    ) {
+    public function __construct($caFile = null, $expectedOrganization = null)
+    {
+        $this->caFile = $caFile;
+        $this->expectedOrganization = $expectedOrganization;
     }
 
     /**
@@ -35,18 +41,18 @@ final class ResponseVerifier
     /**
      * @throws ResponseVerificationException
      */
-    public function verify(\DOMDocument $document): void
+    public function verify(\DOMDocument $document)
     {
         $certificate = $this->verifySignature($document);
         $this->verifyCertificate($certificate);
     }
 
     /**
-     * @return \OpenSSLCertificate the certificate which created the verified signature
+     * @return resource|\OpenSSLCertificate the certificate which created the verified signature
      *
      * @throws ResponseVerificationException
      */
-    public function verifySignature(\DOMDocument $document): \OpenSSLCertificate
+    public function verifySignature(\DOMDocument $document)
     {
         $xpath = new \DOMXPath($document);
         $xpath->registerNamespace('s', Namespaces::SOAP);
@@ -71,7 +77,7 @@ final class ResponseVerifier
         $digest = hash(
             'sha256',
             $body->C14N(true, false, null, $this->prefixes($xpath, 'ds:Transforms/ds:Transform', $reference)),
-            true,
+            true
         );
         $expectedDigest = base64_decode($this->single($xpath, 'ds:DigestValue', $reference, 'DigestValue')->textContent, true);
         if (!is_string($expectedDigest) || !hash_equals($expectedDigest, $digest)) {
@@ -90,9 +96,11 @@ final class ResponseVerifier
     }
 
     /**
+     * @param resource|\OpenSSLCertificate $certificate
+     *
      * @throws ResponseVerificationException
      */
-    public function verifyCertificate(\OpenSSLCertificate $certificate): void
+    public function verifyCertificate($certificate)
     {
         if ($this->caFile !== null && openssl_x509_checkpurpose($certificate, X509_PURPOSE_ANY, [$this->caFile]) !== true) {
             throw new ResponseVerificationException('The signing certificate is expired or issued by an untrusted authority.');
@@ -102,13 +110,13 @@ final class ResponseVerifier
             $organization = openssl_x509_parse($certificate)['subject']['O'] ?? null;
             if ($organization !== $this->expectedOrganization) {
                 throw new ResponseVerificationException(
-                    sprintf('The signing certificate belongs to an unexpected organization: %s', var_export($organization, true)),
+                    sprintf('The signing certificate belongs to an unexpected organization: %s', var_export($organization, true))
                 );
             }
         }
     }
 
-    private function assertReferencesBody(\DOMXPath $xpath, \DOMElement $reference, \DOMElement $body): void
+    private function assertReferencesBody(\DOMXPath $xpath, \DOMElement $reference, \DOMElement $body)
     {
         $bodyId = $body->getAttributeNS(Namespaces::WSU, 'Id');
         if (preg_match('/^[\w.-]+$/D', $bodyId) !== 1 || $reference->getAttribute('URI') !== '#' . $bodyId) {
@@ -120,11 +128,14 @@ final class ResponseVerifier
         }
     }
 
-    private function readCertificate(\DOMXPath $xpath, \DOMElement $signature): \OpenSSLCertificate
+    /**
+     * @return resource|\OpenSSLCertificate
+     */
+    private function readCertificate(\DOMXPath $xpath, \DOMElement $signature)
     {
         $tokenReference = $this->single($xpath, 'ds:KeyInfo/wsse:SecurityTokenReference/wsse:Reference', $signature, 'SecurityTokenReference');
         $uri = $tokenReference->getAttribute('URI');
-        if (!str_starts_with($uri, '#')) {
+        if (strpos($uri, '#') !== 0) {
             throw new ResponseVerificationException('The signature does not reference an embedded certificate.');
         }
 
@@ -147,7 +158,7 @@ final class ResponseVerifier
         throw new ResponseVerificationException('The certificate referenced by the signature was not found.');
     }
 
-    private function assertAlgorithm(\DOMXPath $xpath, string $query, \DOMElement $context, string $expected): void
+    private function assertAlgorithm(\DOMXPath $xpath, string $query, \DOMElement $context, string $expected)
     {
         $element = $this->single($xpath, $query, $context, $query);
         if ($element->getAttribute('Algorithm') !== $expected) {
@@ -158,17 +169,20 @@ final class ResponseVerifier
     /**
      * @return list<string>|null
      */
-    private function prefixes(\DOMXPath $xpath, string $query, \DOMElement $context): ?array
+    private function prefixes(\DOMXPath $xpath, string $query, \DOMElement $context)
     {
-        $list = $xpath->query($query . '/ec:InclusiveNamespaces/@PrefixList', $context)->item(0)?->nodeValue;
+        $list = $xpath->query($query . '/ec:InclusiveNamespaces/@PrefixList', $context)->item(0);
         if ($list === null) {
             return null;
         }
 
-        return preg_split('/\s+/', trim($list), -1, PREG_SPLIT_NO_EMPTY) ?: null;
+        return preg_split('/\s+/', trim($list->nodeValue), -1, PREG_SPLIT_NO_EMPTY) ?: null;
     }
 
-    private function single(\DOMXPath $xpath, string $query, ?\DOMElement $context, string $name): \DOMElement
+    /**
+     * @param \DOMElement|null $context
+     */
+    private function single(\DOMXPath $xpath, string $query, $context, string $name): \DOMElement
     {
         $nodes = $xpath->query($query, $context);
         if ($nodes === false || $nodes->length !== 1 || !$nodes->item(0) instanceof \DOMElement) {

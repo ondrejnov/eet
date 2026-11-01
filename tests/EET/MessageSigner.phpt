@@ -63,10 +63,10 @@ Assert::same(0, $xpath->query('//*[contains(namespace-uri(), "addressing")]')->l
 
 // The structure of the security header is the same as in the official sample messages.
 $official = file_get_contents(DIR_FIXTURES . '/CZ00000019.eet.v4.req.xml');
-$normalize = static fn (array $lines): array => array_map(
-    static fn (string $line): string => str_replace(' mustUnderstand', '', str_replace('[mustUnderstand', '[', $line)),
-    $lines,
-);
+$normalize = static function (array $lines): array { return array_map(
+    static function (string $line): string { return str_replace(' mustUnderstand', '', str_replace('[mustUnderstand', '[', $line)); },
+    $lines
+); };
 Assert::same($normalize(skeleton(soapHeader($official))), $normalize(skeleton(soapHeader($xml))));
 
 // The content matches the published XSD, including all optional items and the verification mode.

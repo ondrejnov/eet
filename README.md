@@ -1,8 +1,8 @@
-# EET 2.0 klient pro PHP 8
+# EET 2.0 klient pro PHP
 
 Knihovna pro odesílání evidovaných tržeb do systému [EET 2.0](https://eet.gov.cz/cs/pro-vyvojare/dokumenty-ke-stazeni) (rozhraní v4.1, zákon účinný od 1. 1. 2027). Sestaví zprávu, podepíše ji pokladním certifikátem, odešle a ověří podpis potvrzení.
 
-- Požadavky: PHP 8.1 až 8.5 a rozšíření `curl`, `dom`, `openssl`
+- Požadavky: PHP 7.0 až 8.5 a rozšíření `curl`, `dom`, `openssl`
 - Bez dalších závislostí, nepotřebuje `ext-soap` ani WSDL za běhu
 - Otestováno proti živému playgroundu na všech třech testovacích identitách
 
@@ -113,7 +113,7 @@ Jestli stejnou šifru používají i produkční `.p12`, zatím nebylo možné o
 Výchozí časové limity jsou 2,5 s na požadavek a 2 s na spojení. Lze je změnit vlastním transportem:
 
 ```php
-new Dispatcher($url, $certificate, null, new CurlTransport(timeoutMs: 5000, connectTimeoutMs: 3000));
+new Dispatcher($url, $certificate, null, new CurlTransport(5000, 3000));
 ```
 
 ## Přechod z verze 0.x
@@ -147,4 +147,4 @@ Testovací vektory v `tests/fixtures` tvoří oficiální vzorové zprávy a sku
 
 ## In English
 
-Client for the Czech electronic registration of sales, EET 2.0 (interface v4.1), for PHP 8.1+. It builds and signs the WS-Security message, sends it over HTTPS and verifies the signed confirmation. This version targets the **non-production playground only**. See the code samples above and `examples/simpleClient/Example.php`.
+Client for the Czech electronic registration of sales, EET 2.0 (interface v4.1), for PHP 7.0+. It builds and signs the WS-Security message, sends it over HTTPS and verifies the signed confirmation. This version targets the **non-production playground only**. See the code samples above and `examples/simpleClient/Example.php`.

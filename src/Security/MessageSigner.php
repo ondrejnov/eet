@@ -16,10 +16,10 @@ use Ondrejnov\EET\Exceptions\ClientException;
  */
 final class MessageSigner
 {
-    private const SIGNED_INFO_PREFIXES = ['soapenv', 'v4'];
-    private const BODY_PREFIXES = ['v4'];
+    const SIGNED_INFO_PREFIXES = ['soapenv', 'v4'];
+    const BODY_PREFIXES = ['v4'];
 
-    public function sign(\DOMDocument $document, Certificate $certificate): void
+    public function sign(\DOMDocument $document, Certificate $certificate)
     {
         $envelope = $document->documentElement;
         $header = $envelope->getElementsByTagNameNS(Namespaces::SOAP, 'Header')->item(0);
@@ -96,7 +96,10 @@ final class MessageSigner
         $tokenReference->appendChild($tokenLink);
     }
 
-    private function ds(\DOMDocument $document, string $name, ?string $value = null): \DOMElement
+    /**
+     * @param string|null $value
+     */
+    private function ds(\DOMDocument $document, string $name, $value = null): \DOMElement
     {
         return $value === null
             ? $document->createElementNS(Namespaces::DS, 'ds:' . $name)

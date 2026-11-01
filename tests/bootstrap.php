@@ -24,7 +24,7 @@ const FILE_CA_BUNDLE = __DIR__ . '/../resources/ica-signing-ca.pem';
  *
  * @return array{key: string, cert: string} paths to PEM files
  */
-function createKeyPairFiles(string $commonName = 'CZ00000019', string $organization = 'Test', ?string $passphrase = null): array
+function createKeyPairFiles(string $commonName = 'CZ00000019', string $organization = 'Test', $passphrase = null): array
 {
     $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
     $csr = openssl_csr_new(['commonName' => $commonName, 'organizationName' => $organization, 'countryName' => 'CZ'], $key, ['digest_alg' => 'sha256']);
@@ -37,7 +37,7 @@ function createKeyPairFiles(string $commonName = 'CZ00000019', string $organizat
     $certFile = tempnam(sys_get_temp_dir(), 'eet');
     file_put_contents($keyFile, $keyPem);
     file_put_contents($certFile, $certPem);
-    register_shutdown_function(static function () use ($keyFile, $certFile): void {
+    register_shutdown_function(static function () use ($keyFile, $certFile) {
         @unlink($keyFile);
         @unlink($certFile);
     });
@@ -76,13 +76,13 @@ function loadXml(string $xml): DOMDocument
 /**
  * Envelope with the given content of Odpoved, signed by the given certificate when provided.
  */
-function createResponseXml(string $content, ?Certificate $signer = null): string
+function createResponseXml(string $content, $signer = null): string
 {
     $document = loadXml(sprintf(
         '<soapenv:Envelope xmlns:soapenv="%s" xmlns:v4="%s"><soapenv:Header/><soapenv:Body><v4:Odpoved>%s</v4:Odpoved></soapenv:Body></soapenv:Envelope>',
         Namespaces::SOAP,
         Namespaces::EET,
-        $content,
+        $content
     ));
 
     if ($signer !== null) {
@@ -98,11 +98,15 @@ function createResponseXml(string $content, ?Certificate $signer = null): string
 final class FakeTransport implements Transport
 {
     /** @var list<array{url: string, body: string, action: string}> */
-    public array $requests = [];
+    public $requests = [];
+
+    /** @var (\Closure(string): HttpResponse)|HttpResponse|\Throwable */
+    private $reply;
 
     /** @param (\Closure(string): HttpResponse)|HttpResponse|\Throwable $reply */
-    public function __construct(private \Closure|HttpResponse|\Throwable $reply)
+    public function __construct($reply)
     {
+        $this->reply = $reply;
     }
 
     public function post(string $url, string $body, string $soapAction): HttpResponse
@@ -120,7 +124,7 @@ final class FakeTransport implements Transport
 /**
  * Reads an attribute of the header or data element from a request.
  */
-function requestAttribute(string $xml, string $element, string $attribute): ?string
+function requestAttribute(string $xml, string $element, string $attribute)
 {
     $node = loadXml($xml)->getElementsByTagNameNS(Namespaces::EET, $element)->item(0);
 

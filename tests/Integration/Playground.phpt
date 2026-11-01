@@ -25,12 +25,12 @@ if (!is_file(DIR_CERT . '/CZ00000019.key')) {
     Environment::skip('Run scripts/fetch-playground-certs.sh first.');
 }
 
-$dispatcherFor = static fn (string $eic): Dispatcher => new Dispatcher(
+$dispatcherFor = static function (string $eic): Dispatcher { return new Dispatcher(
     Dispatcher::PLAYGROUND_URL,
     Certificate::fromPem(DIR_CERT . '/' . $eic . '.key', DIR_CERT . '/' . $eic . '.pem'),
     null,
-    new CurlTransport(15000, 10000),
-);
+    new CurlTransport(15000, 10000)
+); };
 
 $receiptFor = static function (string $eic): Receipt {
     $receipt = new Receipt();
@@ -55,7 +55,7 @@ foreach (['CZ00000019', 'CZ683555118', 'CZ8551015704'] as $eic) {
     Assert::true($response->test);
     Assert::same($dispatcher->getLastUuid(), $response->uuid);
     Assert::same([], $response->warnings);
-    Assert::notNull($response->transactionId);
+    Assert::true($response->transactionId !== null);
 
     Assert::true($dispatcher->check($receiptFor($eic)));
     Assert::same(0, $dispatcher->getLastResponse()->errorCode);
@@ -95,6 +95,6 @@ Assert::true($dispatcher->check($receipt));
 Assert::same([5], array_keys($dispatcher->getWarnings()));
 
 // Critical error: EIC with the valid format but with a wrong check digit.
-Assert::exception(static fn () => $dispatcher->send($receiptFor('CZ00000018')), ServerException::class, null, 6);
+Assert::exception(static function () use ($dispatcher, $receiptFor) { return $dispatcher->send($receiptFor('CZ00000018')); }, ServerException::class, null, 6);
 Assert::false($dispatcher->check($receiptFor('CZ00000018')));
 Assert::same(6, $dispatcher->getLastResponse()->errorCode);

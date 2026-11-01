@@ -27,13 +27,13 @@ $dispatcherFor = static function ($reply) use ($certificate, $verifier, &$transp
 };
 
 /** Signed confirmation of the message in the request, as the server would create it. */
-$confirm = static function (string $extra = '', string $pok = POK, ?string $uuid = null, bool $sign = true) use ($serverCertificate): Closure {
+$confirm = static function (string $extra = '', string $pok = POK, $uuid = null, bool $sign = true) use ($serverCertificate): Closure {
     return static function (string $request) use ($extra, $pok, $uuid, $sign, $serverCertificate): HttpResponse {
         $content = sprintf(
             '<v4:Hlavicka uuid_zpravy="%s" dat_prij="2027-03-04T18:25:21+01:00"/><v4:Potvrzeni pok="%s" test="true"/>%s',
             $uuid ?? requestAttribute($request, 'Hlavicka', 'uuid_zpravy'),
             $pok,
-            $extra,
+            $extra
         );
 
         return new HttpResponse(200, createResponseXml($content, $sign ? $serverCertificate : null), 'trans-1');
@@ -41,13 +41,13 @@ $confirm = static function (string $extra = '', string $pok = POK, ?string $uuid
 };
 
 $reject = static function (int $code, string $text = 'Popis chyby', string $extra = ''): Closure {
-    return static fn (string $request): HttpResponse => new HttpResponse(200, createResponseXml(sprintf(
+    return static function (string $request) use ($code, $text, $extra): HttpResponse { return new HttpResponse(200, createResponseXml(sprintf(
         '<v4:Hlavicka uuid_zpravy="%s" dat_odmit="2027-03-04T18:25:21+01:00"/><v4:Chyba kod="%d" test="true">%s</v4:Chyba>%s',
         requestAttribute($request, 'Hlavicka', 'uuid_zpravy'),
         $code,
         $text,
-        $extra,
-    )), 'trans-2');
+        $extra
+    )), 'trans-2'); };
 };
 
 // Successful registration.
@@ -71,10 +71,28 @@ Assert::same(strlen($transport->requests[0]['body']), $dispatcher->getLastReques
 Assert::true($dispatcher->getLastResponseSize() > 0);
 Assert::type('float', $dispatcher->getLastResponseTime());
 
+// The parsed response cannot be changed afterwards.
+Assert::true(isset($response->pok));
+Assert::false(isset($response->errorCode));
+Assert::exception(static function () use ($response) { $response->pok = 'forged'; }, Error::class, '~read-only~');
+Assert::exception(static function () use ($response) { unset($response->pok); }, Error::class, '~read-only~');
+Assert::exception(static function () use ($response) { $response->other = 1; }, Error::class, '~read-only~');
+Assert::exception(static function () use ($response) { return $response->other; }, Error::class, '~Undefined property~');
+Assert::same(POK, $response->pok);
+
+$http = new HttpResponse(200, 'body');
+Assert::same(200, $http->status);
+Assert::null($http->transactionId);
+Assert::exception(static function () use ($http) { $http->body = 'forged'; }, Error::class, '~read-only~');
+
+// Wrong collaborators fail right away, before a sale is registered.
+Assert::exception(static function () use ($certificate) { new Dispatcher(Dispatcher::PLAYGROUND_URL, $certificate, 'x'); }, TypeError::class);
+Assert::exception(static function () use ($certificate) { new Dispatcher(Dispatcher::PLAYGROUND_URL, $certificate, null, 'x'); }, TypeError::class);
+
 // Warnings of the permeable checks do not stop the registration.
 $dispatcher = $dispatcherFor($confirm(
     '<v4:Varovani kod_varov="1">  EIC poplatnika v datove zprave se neshoduje s EIC v certifikatu  </v4:Varovani>'
-    . '<v4:Varovani kod_varov="6">id_jednotky neodpovida formatem pridelenemu c. evidencni jednotky</v4:Varovani>',
+    . '<v4:Varovani kod_varov="6">id_jednotky neodpovida formatem pridelenemu c. evidencni jednotky</v4:Varovani>'
 ));
 Assert::same(POK, $dispatcher->send(createReceipt()));
 Assert::same([
@@ -100,7 +118,8 @@ $dispatcher = $dispatcherFor($confirm());
 $receipt = createReceipt();
 $dispatcher->send($receipt);
 $dispatcher->send($receipt->forResend());
-[$firstRequest, $secondRequest] = [$transport->requests[0]['body'], $transport->requests[1]['body']];
+$firstRequest = $transport->requests[0]['body'];
+$secondRequest = $transport->requests[1]['body'];
 Assert::same('true', requestAttribute($firstRequest, 'Hlavicka', 'prvni_zaslani'));
 Assert::same('false', requestAttribute($secondRequest, 'Hlavicka', 'prvni_zaslani'));
 Assert::notSame(requestAttribute($firstRequest, 'Hlavicka', 'uuid_zpravy'), requestAttribute($secondRequest, 'Hlavicka', 'uuid_zpravy'));
@@ -112,25 +131,25 @@ foreach (['eic_popl', 'id_jednotky', 'id_pokl', 'porad_cis', 'dat_trzby', 'celk_
 $dispatcher = $dispatcherFor($confirm());
 $receipt = createReceipt();
 $receipt->eic_popl = 'x';
-Assert::exception(static fn () => $dispatcher->send($receipt), ValidationException::class);
-Assert::exception(static fn () => $dispatcher->check($receipt), ValidationException::class);
+Assert::exception(static function () use ($dispatcher, $receipt) { return $dispatcher->send($receipt); }, ValidationException::class);
+Assert::exception(static function () use ($dispatcher, $receipt) { return $dispatcher->check($receipt); }, ValidationException::class);
 Assert::count(0, $transport->requests);
 
 // Critical errors.
 $dispatcher = $dispatcherFor($reject(4, 'Neplatny podpis SOAP zpravy'));
-$exception = Assert::exception(static fn () => $dispatcher->send(createReceipt()), ServerException::class, 'Neplatny podpis SOAP zpravy', 4);
+$exception = Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ServerException::class, 'Neplatny podpis SOAP zpravy', 4);
 Assert::false($exception->isRetryable());
 Assert::same(4, $exception->getResponse()->errorCode);
 Assert::same('trans-2', $exception->getResponse()->transactionId);
 
 foreach ([-1, 8] as $code) {
     $dispatcher = $dispatcherFor($reject($code));
-    Assert::true(Assert::exception(static fn () => $dispatcher->send(createReceipt()), ServerException::class)->isRetryable());
+    Assert::true(Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ServerException::class)->isRetryable());
 }
 
 // A missing text is replaced by a description of the known code.
 $dispatcher = $dispatcherFor($reject(6, ''));
-Assert::exception(static fn () => $dispatcher->send(createReceipt()), ServerException::class, 'EIČ poplatníka má chybnou strukturu.', 6);
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ServerException::class, 'EIČ poplatníka má chybnou strukturu.', 6);
 
 // Verification mode.
 $dispatcher = $dispatcherFor($reject(0, 'Datovou zpravu evidovane trzby v overovacim modu se podarilo zpracovat', '<v4:Varovani kod_varov="5">Datum</v4:Varovani>'));
@@ -145,18 +164,18 @@ Assert::same(6, $dispatcher->getLastResponse()->errorCode);
 
 // The response of the verification mode is not a registration.
 $dispatcher = $dispatcherFor($reject(0));
-Assert::exception(static fn () => $dispatcher->send(createReceipt()), ServerException::class, '~confirmation code~');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ServerException::class, '~confirmation code~');
 
 // Confirmations that cannot be trusted keep the data for diagnostics but are refused.
 $dispatcher = $dispatcherFor($confirm('', POK, null, false));
-$exception = Assert::exception(static fn () => $dispatcher->send(createReceipt()), ResponseVerificationException::class, '~exactly one Signature~');
+$exception = Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ResponseVerificationException::class, '~exactly one Signature~');
 Assert::same(POK, $exception->getResponse()->pok);
 
 $dispatcher = $dispatcherFor($confirm('', POK, '123e4567-e89b-42d3-a456-426655440000'));
-Assert::exception(static fn () => $dispatcher->send(createReceipt()), ResponseVerificationException::class, '~different message~');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ResponseVerificationException::class, '~different message~');
 
 $dispatcher = $dispatcherFor($confirm('', 'not-a-pok'));
-Assert::exception(static fn () => $dispatcher->send(createReceipt()), ResponseVerificationException::class, '~invalid format~');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ResponseVerificationException::class, '~invalid format~');
 
 $impostor = new Dispatcher(
     Dispatcher::PLAYGROUND_URL,
@@ -166,25 +185,25 @@ $impostor = new Dispatcher(
         return new HttpResponse(200, createResponseXml(sprintf(
             '<v4:Hlavicka uuid_zpravy="%s" dat_prij="2027-03-04T18:25:21+01:00"/><v4:Potvrzeni pok="%s"/>',
             requestAttribute($request, 'Hlavicka', 'uuid_zpravy'),
-            POK,
+            POK
         ), createTestCertificate('CZ72080043', 'Utocnik')));
-    }),
+    })
 );
-Assert::exception(static fn () => $impostor->send(createReceipt()), ResponseVerificationException::class, '~unexpected organization~');
+Assert::exception(static function () use ($impostor) { return $impostor->send(createReceipt()); }, ResponseVerificationException::class, '~unexpected organization~');
 
 // A response of the verification mode cannot hide a trust failure.
 Assert::exception(
-    static fn () => (new Dispatcher(Dispatcher::PLAYGROUND_URL, $certificate, $verifier, new FakeTransport($confirm('', POK, null, false))))->check(createReceipt()),
-    ResponseVerificationException::class,
+    static function () use ($certificate, $verifier, $confirm) { return (new Dispatcher(Dispatcher::PLAYGROUND_URL, $certificate, $verifier, new FakeTransport($confirm('', POK, null, false))))->check(createReceipt()); },
+    ResponseVerificationException::class
 );
 
 // SOAP fault.
 $fault = sprintf(
     '<soapenv:Envelope xmlns:soapenv="%s"><soapenv:Body><soapenv:Fault><faultcode>soapenv:Client</faultcode><faultstring>Bad message</faultstring></soapenv:Fault></soapenv:Body></soapenv:Envelope>',
-    Namespaces::SOAP,
+    Namespaces::SOAP
 );
 $dispatcher = $dispatcherFor(new HttpResponse(500, $fault));
-Assert::exception(static fn () => $dispatcher->send(createReceipt()), ServerException::class, 'SOAP fault: Bad message');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ServerException::class, 'SOAP fault: Bad message');
 
 function createResponseXmlWithoutDeclaration(string $content): string
 {
@@ -192,7 +211,7 @@ function createResponseXmlWithoutDeclaration(string $content): string
         '<soapenv:Envelope xmlns:soapenv="%s" xmlns:v4="%s"><soapenv:Body><v4:Odpoved>%s</v4:Odpoved></soapenv:Body></soapenv:Envelope>',
         Namespaces::SOAP,
         Namespaces::EET,
-        $content,
+        $content
     );
 }
 
@@ -205,10 +224,10 @@ $unusable = [
 ];
 foreach ($unusable as $description => $reply) {
     $dispatcher = $dispatcherFor($reply);
-    Assert::exception(static fn () => $dispatcher->send(createReceipt()), TransportException::class, null, null, $description);
+    Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, TransportException::class, null, null, $description);
     Assert::null($dispatcher->getLastResponse());
 }
 
 $dispatcher = $dispatcherFor(new TransportException('Operation timed out', 28));
-Assert::exception(static fn () => $dispatcher->send(createReceipt()), TransportException::class, 'Operation timed out', 28);
-Assert::exception(static fn () => $dispatcher->check(createReceipt()), TransportException::class);
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, TransportException::class, 'Operation timed out', 28);
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->check(createReceipt()); }, TransportException::class);

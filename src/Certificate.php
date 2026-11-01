@@ -11,10 +11,20 @@ use Ondrejnov\EET\Exceptions\ClientException;
  */
 final class Certificate
 {
-    private function __construct(
-        private \OpenSSLAsymmetricKey $privateKey,
-        private string $certificatePem,
-    ) {
+    /** @var resource|\OpenSSLAsymmetricKey */
+    private $privateKey;
+
+    /** @var string */
+    private $certificatePem;
+
+    /**
+     * @param resource|\OpenSSLAsymmetricKey $privateKey
+     */
+    private function __construct($privateKey, string $certificatePem)
+    {
+        $this->privateKey = $privateKey;
+        $this->certificatePem = $certificatePem;
+
         if (!openssl_x509_check_private_key($this->certificatePem, $this->privateKey)) {
             throw new ClientException('The private key does not belong to the certificate.');
         }
@@ -25,7 +35,11 @@ final class Certificate
      *
      * @throws ClientException
      */
-    public static function fromPkcs12(string $path, #[\SensitiveParameter] string $password): self
+    public static function fromPkcs12(
+        string $path,
+        #[\SensitiveParameter]
+        string $password
+    ): self
     {
         $content = self::readFile($path);
 
@@ -44,11 +58,18 @@ final class Certificate
     /**
      * Loads a PEM private key and a PEM certificate.
      *
+     * @param string|null $passphrase
+     *
      * @throws ClientException
      */
-    public static function fromPem(string $keyPath, string $certificatePath, #[\SensitiveParameter] ?string $passphrase = null): self
-    {
-        $privateKey = openssl_pkey_get_private(self::readFile($keyPath), $passphrase);
+    public static function fromPem(
+        string $keyPath,
+        string $certificatePath,
+        #[\SensitiveParameter]
+        $passphrase = null
+    ): self {
+        $key = self::readFile($keyPath);
+        $privateKey = $passphrase === null ? openssl_pkey_get_private($key) : openssl_pkey_get_private($key, $passphrase);
         if ($privateKey === false) {
             throw new ClientException('Cannot read the private key from ' . $keyPath . ': ' . self::lastOpenSslError());
         }
@@ -56,7 +77,10 @@ final class Certificate
         return new self($privateKey, self::readFile($certificatePath));
     }
 
-    public function getPrivateKey(): \OpenSSLAsymmetricKey
+    /**
+     * @return resource|\OpenSSLAsymmetricKey
+     */
+    public function getPrivateKey()
     {
         return $this->privateKey;
     }

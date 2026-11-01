@@ -24,14 +24,14 @@ Assert::same('99999999.99', Format::price(99999999.99));
 Assert::same('-99999999.99', Format::price('-99999999.99'));
 Assert::null(Format::price(null));
 
-Assert::exception(fn () => Format::price(100000000), ValidationException::class);
-Assert::exception(fn () => Format::price(-100000000), ValidationException::class);
-Assert::exception(fn () => Format::price(99999999.999), ValidationException::class);
-Assert::exception(fn () => Format::price('12,50'), ValidationException::class);
-Assert::exception(fn () => Format::price('abc'), ValidationException::class);
-Assert::exception(fn () => Format::price(''), ValidationException::class);
-Assert::exception(fn () => Format::price(NAN), ValidationException::class);
-Assert::exception(fn () => Format::price(INF), ValidationException::class);
+Assert::exception(function () { return Format::price(100000000); }, ValidationException::class);
+Assert::exception(function () { return Format::price(-100000000); }, ValidationException::class);
+Assert::exception(function () { return Format::price(99999999.999); }, ValidationException::class);
+Assert::exception(function () { return Format::price('12,50'); }, ValidationException::class);
+Assert::exception(function () { return Format::price('abc'); }, ValidationException::class);
+Assert::exception(function () { return Format::price(''); }, ValidationException::class);
+Assert::exception(function () { return Format::price(NAN); }, ValidationException::class);
+Assert::exception(function () { return Format::price(INF); }, ValidationException::class);
 
 $winter = new DateTimeImmutable('2027-01-09 04:25:28.123456', new DateTimeZone('Europe/Prague'));
 Assert::same('2027-01-09T04:25:28+01:00', Format::dateTime($winter));

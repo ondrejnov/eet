@@ -9,11 +9,11 @@ use Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
 
-$assertInvalid = static function (string $item, mixed $value): void {
+$assertInvalid = static function (string $item, $value) {
     $receipt = createReceipt();
     $receipt->$item = $value;
 
-    $exception = Assert::exception(static fn () => $receipt->validate(), ValidationException::class);
+    $exception = Assert::exception(static function () use ($receipt) { return $receipt->validate(); }, ValidationException::class);
     Assert::contains($item, $exception->getMessage(), $item . ' = ' . var_export($value, true));
 };
 
@@ -57,20 +57,32 @@ $assertInvalid('celk_trzba', '12,50');
 $assertInvalid('urceno_cerp_zuct', 100000000);
 $assertInvalid('cerp_zuct', 'abc');
 
+// Wrong types are refused as well, nothing is silently converted.
+$assertInvalid('dat_trzby', '2027-01-01 12:00:00');
+$assertInvalid('prvni_zaslani', 'false');
+$assertInvalid('prvni_zaslani', null);
+$assertInvalid('povereni_vice_popl', 1);
+$assertInvalid('id_jednotky', true);
+$assertInvalid('id_jednotky', 181.5);
+$assertInvalid('id_pokl', ['x']);
+$assertInvalid('porad_cis', new stdClass());
+$assertInvalid('celk_trzba', true);
+$assertInvalid('cerp_zuct', [1]);
+
 // All problems are reported at once.
 $receipt = new Receipt();
-$exception = Assert::exception(static fn () => $receipt->validate(), ValidationException::class);
+$exception = Assert::exception(static function () use ($receipt) { return $receipt->validate(); }, ValidationException::class);
 Assert::count(6, $exception->getErrors());
 
 // Items removed or renamed in EET 2.0 must not silently disappear.
-$exception = Assert::exception(static function (): void {
+$exception = Assert::exception(static function () {
     $receipt = new Receipt();
     $receipt->dic_popl = 'CZ00000019';
 }, ClientException::class);
 Assert::contains('eic_popl', $exception->getMessage());
 
 foreach (['id_provoz', 'dan1', 'zakl_dan1', 'rezim', 'celk_trzb'] as $unknown) {
-    Assert::exception(static function () use ($unknown): void {
+    Assert::exception(static function () use ($unknown) {
         $receipt = new Receipt();
         $receipt->$unknown = 1;
     }, ClientException::class);
