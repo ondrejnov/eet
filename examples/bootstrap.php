@@ -1,11 +1,8 @@
 <?php
 
-ini_set('display_errors', 1);
-define('DIR_ROOT', __DIR__ . '/..');
-define('DIR_CERT', DIR_ROOT . '/_cert');
-define('DIR_VENDOR', DIR_ROOT . '/vendor');
-define('DIR_SRC', DIR_ROOT . '/src');
-define('DIR_TEMP', DIR_ROOT . '/temp');
-define('PLAYGROUND_WSDL',  DIR_SRC . '/Schema/PlaygroundService.wsdl');
+declare(strict_types=1);
 
-require_once DIR_VENDOR . "/autoload.php";
+const DIR_ROOT = __DIR__ . '/..';
+const DIR_CERT = DIR_ROOT . '/_cert';
+
+require_once DIR_ROOT . '/vendor/autoload.php';

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+                  xmlns:tns="http://fs.gov.cz/eet/schema/v4" 
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                  name="EET" targetNamespace="http://fs.gov.cz/eet/schema/v4">
+  <wsdl:documentation>
+    Ucel     : Sluzba pro odeslani datove zpravy evidovane trzby 
+    Verze    : 4.1
+    Vlastnik : Generalni financni reditelstvi
+  </wsdl:documentation>
+  <wsdl:types>
+    <xsd:schema>
+        <xsd:import namespace="http://fs.gov.cz/eet/schema/v4" schemaLocation="EETXMLSchema.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="OdeslaniTrzbyRequest">
+    <wsdl:part element="tns:Trzba" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="OdeslaniTrzbyResponse">
+    <wsdl:part element="tns:Odpoved" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="EET">
+    <wsdl:operation name="OdeslaniTrzby">
+      <wsdl:input message="tns:OdeslaniTrzbyRequest"/>
+      <wsdl:output message="tns:OdeslaniTrzbyResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="EETSOAP" type="tns:EET">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="OdeslaniTrzby">
+      <soap:operation soapAction="http://fs.gov.cz/eet/OdeslaniTrzby"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="EETService">
+    <wsdl:port binding="tns:EETSOAP" name="EETServiceSOAP">
+      <!-- 
+        Na nasledujicim radku je doplnena adresa "playground"
+        1. "pg.trzbyeet.gov.cz" domenove jmeno
+        2. "443" cislo portu
+        Tato adresa plati pouze pro neprodukcni prostredi!
+      -->
+      <soap:address location="https://pg.trzbyeet.gov.cz:443/eet/services/EETServiceSOAP/v4"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

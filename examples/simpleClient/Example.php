@@ -1,49 +1,59 @@
 <?php
 
-require_once __DIR__ . "/../bootstrap.php";
+declare(strict_types=1);
 
-use Ondrejnov\EET\Exceptions\ServerException;
+/**
+ * Sends a sale to the EET playground, run it after scripts/fetch-playground-certs.sh.
+ */
+
+require_once __DIR__ . '/../bootstrap.php';
+
+use Ondrejnov\EET\Certificate;
 use Ondrejnov\EET\Dispatcher;
+use Ondrejnov\EET\Exceptions\ServerException;
+use Ondrejnov\EET\Exceptions\TransportException;
 use Ondrejnov\EET\Receipt;
-use Ondrejnov\EET\Utils\UUID;
 
-$dispatcher = new Dispatcher(PLAYGROUND_WSDL, DIR_CERT . '/eet.key', DIR_CERT . '/eet.pem');
-$dispatcher->trace = TRUE;
+$certificate = Certificate::fromPem(DIR_CERT . '/CZ00000019.key', DIR_CERT . '/CZ00000019.pem');
+$dispatcher = new Dispatcher(Dispatcher::PLAYGROUND_URL, $certificate);
 
-// Example receipt
-$r = new Receipt();
-$r->uuid_zpravy = UUID::v4();
-$r->dic_popl = 'CZ00000019';
-$r->id_provoz = '181';
-$r->id_pokl = '1';
-$r->porad_cis = '1';
-$r->dat_trzby = new \DateTime();
-$r->celk_trzba = 1000;
+$receipt = new Receipt();
+$receipt->eic_popl = 'CZ00000019';
+$receipt->id_jednotky = 181;
+$receipt->id_pokl = 'POKLADNA-1';
+$receipt->porad_cis = (string) time();
+$receipt->dat_trzby = new DateTimeImmutable('now', new DateTimeZone('Europe/Prague'));
+$receipt->celk_trzba = 1000;
 
-// Valid response should be returned
-echo '<h2>---VALID REQUEST---</h2>';
+echo "--- Verification mode ---\n";
+echo 'Message can be processed: ', $dispatcher->check($receipt) ? 'yes' : 'no', "\n";
+
+echo "--- Registration ---\n";
 try {
-    $fik = $dispatcher->send($r); // Send request
-
-    echo sprintf('<b>Returned FIK code: %s</b><br />', $fik); // See response - should be returned
+    echo 'POK: ', $dispatcher->send($receipt), "\n";
+} catch (TransportException $e) {
+    // The state of the sale is unknown: send $receipt->forResend() as soon as possible.
+    echo 'No response: ', $e->getMessage(), "\n";
 } catch (ServerException $e) {
-    var_dump($e); // See exception
-} catch (\Exception $e) {
-    var_dump($e); // Fatal error
+    echo sprintf("Refused with code %d: %s\n", $e->getCode(), $e->getMessage());
 }
 
-echo sprintf('Request size: %d bytes | Response size: %d bytes | Response time: %f ms | Connection time: %f ms<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize(), $dispatcher->getLastResponseTime(), $dispatcher->getConnectionTime()); // Size of transferred data
-// Example of error message
-$r->dic_popl = 'x';
-
-// ServerException should be returned
-echo '<h2>---ERROR REQUEST---</h2>';
-try {
-    var_dump($dispatcher->send($r)); // Send request and see response
-} catch (ServerException $e) {
-    echo sprintf('<b>Error from server of Ministry of Finance: %s</b><br />', $e->getMessage()); // See exception - should be returned
-} catch (\Exception $e) {
-    var_dump($e); // Fatal error
+foreach ($dispatcher->getWarnings() as $code => $message) {
+    echo sprintf("Warning %d: %s\n", $code, $message);
 }
 
-echo sprintf('Request size: %d bytes | Response size: %d bytes | Response time: %f ms | Connection time: %f ms<br />', $dispatcher->getLastRequestSize(), $dispatcher->getLastResponseSize(), $dispatcher->getLastResponseTime(), $dispatcher->getConnectionTime()); // Size of transferred data
+echo sprintf(
+    "Request: %d B, response: %d B, time: %.0f ms, transaction: %s\n",
+    $dispatcher->getLastRequestSize(),
+    $dispatcher->getLastResponseSize(),
+    $dispatcher->getLastResponseTime() * 1000,
+    $dispatcher->getLastResponse()?->transactionId,
+);
+
+echo "--- Critical error ---\n";
+$receipt->eic_popl = 'CZ00000018';
+try {
+    $dispatcher->send($receipt);
+} catch (ServerException $e) {
+    echo sprintf("Refused with code %d: %s\n", $e->getCode(), $e->getMessage());
+}

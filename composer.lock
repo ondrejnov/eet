@@ -4,108 +4,31 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c66b6a278e64af47426a00b37ffdb8ce",
-    "packages": [
-        {
-            "name": "robrichards/wse-php",
-            "version": "2.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/robrichards/wse-php.git",
-                "reference": "7d2218937008e8badac5d080309bab76431fbc61"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/wse-php/zipball/7d2218937008e8badac5d080309bab76431fbc61",
-                "reference": "7d2218937008e8badac5d080309bab76431fbc61",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">= 5.3",
-                "robrichards/xmlseclibs": ">=2.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "RobRichards\\WsePhp\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Rob Richards",
-                    "homepage": "http://www.cdatazone.org/",
-                    "role": "Main developer"
-                }
-            ],
-            "description": "Libraries for adding WS-* support to ext/soap in PHP.",
-            "homepage": "https://github.com/robrichards/wse-php",
-            "keywords": [
-                "WS-Security",
-                "soap",
-                "ws-addressing"
-            ],
-            "time": "2017-08-31T09:48:18+00:00"
-        },
-        {
-            "name": "robrichards/xmlseclibs",
-            "version": "3.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/robrichards/xmlseclibs.git",
-                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/f8f19e58f26cdb42c54b214ff8a820760292f8df",
-                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df",
-                "shasum": ""
-            },
-            "require": {
-                "ext-openssl": "*",
-                "php": ">= 5.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "RobRichards\\XMLSecLibs\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "description": "A PHP library for XML Security",
-            "homepage": "https://github.com/robrichards/xmlseclibs",
-            "keywords": [
-                "security",
-                "signature",
-                "xml",
-                "xmldsig"
-            ],
-            "time": "2020-09-05T13:00:25+00:00"
-        }
-    ],
+    "content-hash": "17f768704c31fd8bd2563d810baf8a5e",
+    "packages": [],
     "packages-dev": [
         {
             "name": "nette/tester",
-            "version": "v1.7.2",
+            "version": "v2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/tester.git",
-                "reference": "c81e276f9809143312c5be51952b1316901b8403"
+                "reference": "66327711830b5696b091dc019ee2540dbd1cc2fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/tester/zipball/c81e276f9809143312c5be51952b1316901b8403",
-                "reference": "c81e276f9809143312c5be51952b1316901b8403",
+                "url": "https://api.github.com/repos/nette/tester/zipball/66327711830b5696b091dc019ee2540dbd1cc2fd",
+                "reference": "66327711830b5696b091dc019ee2540dbd1cc2fd",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": "8.1 - 8.6"
+            },
+            "require-dev": {
+                "ext-simplexml": "*",
+                "nette/phpstan-rules": "^1.0",
+                "phpstan/extension-installer": "^1.4@stable",
+                "phpstan/phpstan": "^2.3@stable"
             },
             "bin": [
                 "src/tester"
@@ -113,10 +36,13 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.7-dev"
+                    "dev-master": "2.7-dev"
                 }
             },
             "autoload": {
+                "psr-4": {
+                    "Tester\\": "src"
+                },
                 "classmap": [
                     "src/"
                 ]
@@ -124,8 +50,8 @@
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause",
-                "GPL-2.0",
-                "GPL-3.0"
+                "GPL-2.0-only",
+                "GPL-3.0-only"
             ],
             "authors": [
                 {
@@ -133,35 +59,41 @@
                     "homepage": "https://davidgrudl.com"
                 },
                 {
-                    "name": "Nette Community",
-                    "homepage": "https://nette.org/contributors"
+                    "name": "Miloslav Hůla",
+                    "homepage": "https://github.com/milo"
                 }
             ],
-            "description": "Nette Tester: enjoyable unit testing in PHP with code coverage reporter. ????",
+            "description": "🍏 Nette Tester: enjoyable unit testing in PHP. Tests are plain PHP scripts that run in parallel, with readable assertions and code coverage.",
             "homepage": "https://tester.nette.org",
             "keywords": [
-                "Xdebug",
                 "assertions",
-                "clover",
                 "code coverage",
                 "nette",
-                "phpdbg",
+                "parallel",
                 "phpunit",
+                "test framework",
                 "testing",
-                "unit"
+                "unit testing"
             ],
-            "time": "2018-06-01T09:33:19+00:00"
+            "support": {
+                "issues": "https://github.com/nette/tester/issues",
+                "source": "https://github.com/nette/tester/tree/v2.7.0"
+            },
+            "time": "2026-10-26T22:11:38+00:00",
+            "published-time": "2026-10-26T22:24:27+00:00"
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
-    "stability-flags": [],
-    "prefer-stable": true,
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.0",
-        "ext-curl": "*"
+        "php": ">=8.1",
+        "ext-curl": "*",
+        "ext-dom": "*",
+        "ext-openssl": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.11.0"
 }

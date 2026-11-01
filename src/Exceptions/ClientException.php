@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ondrejnov\EET\Exceptions;
 
-class ClientException extends \Exception {
-    
+/**
+ * The problem occurred on the client side, the server has not accepted anything.
+ */
+class ClientException extends \Exception
+{
 }

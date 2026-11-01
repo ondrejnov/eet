@@ -1,3 +1,6 @@
 nbproject/*
 vendor/
 .idea
+_cert/
+tests/output/
+tests/**/output/
