@@ -148,3 +148,5 @@ Testovací vektory v `tests/fixtures` tvoří oficiální vzorové zprávy a sku
 ## In English
 
 Client for the Czech electronic registration of sales, EET 2.0 (interface v4.1), for PHP 7.0+. It builds and signs the WS-Security message, sends it over HTTPS and verifies the signed confirmation. This version targets the **non-production playground only**. See the code samples above and `examples/simpleClient/Example.php`.
+
+Python port: [ondrejnov/eet-py](https://github.com/ondrejnov/eet-py).
