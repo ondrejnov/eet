@@ -18,7 +18,7 @@ class Format
      *
      * @return string|null
      *
-     * @throws ValidationException when the value is not a number or is out of the allowed range
+     * @throws ValidationException when the value is not a number, has more than two decimals or is out of the allowed range
      */
     public static function price($value)
     {
@@ -31,8 +31,12 @@ class Format
             throw new ValidationException(['Amount is not a number: ' . var_export($value, true)]);
         }
 
+        if (self::hasMoreThanTwoDecimals($value, $number)) {
+            throw new ValidationException(['Amount has more than two decimals: ' . var_export($value, true)]);
+        }
+
         $formatted = number_format($number, 2, '.', '');
-        if ($formatted === '-0.00') { // PHP < 8.0 keeps the sign of a value rounded to zero
+        if ($formatted === '-0.00') { // PHP < 8.0 keeps the sign of a negative zero
             $formatted = '0.00';
         }
         if (preg_match(self::PRICE_MASK, $formatted) !== 1) {
@@ -40,6 +44,21 @@ class Format
         }
 
         return $formatted;
+    }
+
+    /**
+     * Rounding would send a different amount than the caller passed. Only the binary noise of
+     * float arithmetic is tolerated, e.g. 0.1 + 0.2 is the amount 0.30.
+     *
+     * @param int|float|string $value
+     */
+    private static function hasMoreThanTwoDecimals($value, float $number): bool
+    {
+        if (is_string($value) && preg_match('/^\s*[+-]?\d*\.(\d*)\s*$/D', $value, $matches) === 1) {
+            return rtrim(substr($matches[1], 2), '0') !== '';
+        }
+
+        return abs($number - round($number, 2)) >= 0.000001;
     }
 
     /**

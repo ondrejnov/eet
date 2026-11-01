@@ -43,6 +43,44 @@ Assert::exception(
     '~untrusted authority~'
 );
 
+// The real signing certificate of the playground is trusted, until it expires.
+if (openssl_x509_parse($certificate)['validTo_time_t'] > time()) {
+    ResponseVerifier::forPlayground()->verifyCertificate($certificate);
+}
+
+// Only the given bundle is trusted, not the certificate store of the system.
+$caKey = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+$caCsr = openssl_csr_new(['commonName' => 'System CA', 'countryName' => 'CZ'], $caKey, ['digest_alg' => 'sha256']);
+$ca = openssl_csr_sign($caCsr, null, $caKey, 2, ['digest_alg' => 'sha256']);
+$leafKey = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+$leafCsr = openssl_csr_new(['commonName' => 'CZ00000019', 'organizationName' => 'Generální finanční ředitelství', 'countryName' => 'CZ'], $leafKey, ['digest_alg' => 'sha256']);
+$leaf = openssl_csr_sign($leafCsr, $ca, $caKey, 2, ['digest_alg' => 'sha256']);
+
+$systemStore = sys_get_temp_dir() . '/eet-system-store-' . getmypid();
+mkdir($systemStore);
+openssl_x509_export_to_file($ca, $systemStore . '/' . openssl_x509_parse($ca)['hash'] . '.0');
+$ownBundle = $systemStore . '/own-bundle.pem';
+openssl_x509_export_to_file($ca, $ownBundle);
+register_shutdown_function(static function () use ($systemStore) { array_map('unlink', glob($systemStore . '/*')); rmdir($systemStore); });
+putenv('SSL_CERT_DIR=' . $systemStore);
+putenv('SSL_CERT_FILE=' . $ownBundle);
+
+(new ResponseVerifier($ownBundle, 'Generální finanční ředitelství'))->verifyCertificate($leaf);
+Assert::exception(
+    static function () use ($leaf) { ResponseVerifier::forPlayground()->verifyCertificate($leaf); },
+    ResponseVerificationException::class,
+    '~untrusted authority~'
+);
+
+// A wrong path must not fall back to the certificate store of the system.
+Assert::exception(
+    static function () use ($leaf, $systemStore) { (new ResponseVerifier($systemStore . '/missing.pem', 'Generální finanční ředitelství'))->verifyCertificate($leaf); },
+    ResponseVerificationException::class,
+    '~does not exist~'
+);
+putenv('SSL_CERT_DIR');
+putenv('SSL_CERT_FILE');
+
 // Changed content.
 $assertRejected(str_replace('c8e6e4cf-92bf-46ee-80fe-986a62bcad2a-ff', '00000000-92bf-46ee-80fe-986a62bcad2a-ff', $confirmation), 'digest');
 $assertRejected(str_replace('test="true"', 'test="false"', $confirmation), 'digest');

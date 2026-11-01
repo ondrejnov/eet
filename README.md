@@ -52,7 +52,7 @@ $dispatcher->check($receipt); // true = chyba 0, false = detail v $dispatcher->g
 | `id_pokl` | ano | označení pokladního zařízení, max. 20 znaků |
 | `porad_cis` | ano | pořadové číslo tržby, max. 25 znaků |
 | `dat_trzby` | ano | `DateTimeInterface`, časová zóna místa tržby |
-| `celk_trzba` | ano | částka v Kč, `int`, `float` nebo číselný řetězec |
+| `celk_trzba` | ano | částka v Kč, `int`, `float` nebo číselný řetězec, nejvýše 2 desetinná místa (nezaokrouhluje se) |
 | `urceno_cerp_zuct` | ne | platby určené k následnému čerpání nebo zúčtování |
 | `cerp_zuct` | ne | platby, které jsou čerpáním nebo zúčtováním |
 | `eic_poverujiciho` | ne | EIČ pověřujícího poplatníka |
@@ -68,7 +68,7 @@ Před odesláním se hodnoty kontrolují podle masek z XSD. Neplatná tržba se 
 | --- | --- | --- |
 | `send()` vrátí POK | tržba přijata | uložit POK, vyhodnotit `getWarnings()` a zalogovat `getLastResponse()->transactionId` |
 | `ValidationException` | neplatná data, nic se neodeslalo | opravit data |
-| `TransportException` | timeout, výpadek nebo nečitelná odpověď, stav tržby není známý | co nejdříve poslat `forResend()` |
+| `TransportException` | timeout, výpadek, SOAP fault nebo odpověď bez POK i platné chyby, stav tržby není známý | co nejdříve poslat `forResend()` |
 | `ServerException`, `isRetryable()` je `true` | dočasná chyba serveru (kód -1 nebo 8) | poslat `forResend()` později |
 | `ServerException`, `isRetryable()` je `false` | kritická chyba, kód je v `getCode()` | opravit příčinu |
 | `ResponseVerificationException` | odpovědi nelze důvěřovat | POK nepoužívat, prověřit |

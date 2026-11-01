@@ -102,8 +102,16 @@ final class ResponseVerifier
      */
     public function verifyCertificate($certificate)
     {
-        if ($this->caFile !== null && openssl_x509_checkpurpose($certificate, X509_PURPOSE_ANY, [$this->caFile]) !== true) {
-            throw new ResponseVerificationException('The signing certificate is expired or issued by an untrusted authority.');
+        if ($this->caFile !== null) {
+            // PHP adds the system CA file or directory when the list contains no file or no directory.
+            // A missing file and the directory below, which holds no hashed CA links, prevent that.
+            if (!is_file($this->caFile)) {
+                throw new ResponseVerificationException(sprintf('The CA file %s does not exist.', $this->caFile));
+            }
+
+            if (openssl_x509_checkpurpose($certificate, X509_PURPOSE_ANY, [$this->caFile, __DIR__ . '/../../resources']) !== true) {
+                throw new ResponseVerificationException('The signing certificate is expired or issued by an untrusted authority.');
+            }
         }
 
         if ($this->expectedOrganization !== null) {

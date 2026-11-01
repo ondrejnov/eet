@@ -87,7 +87,7 @@ class Dispatcher
      * @return string POK, the confirmation code
      *
      * @throws Exceptions\ValidationException the receipt is invalid, nothing was sent
-     * @throws TransportException no valid response was received, send Receipt::forResend() later
+     * @throws TransportException no POK and no rejection was received, send Receipt::forResend() later
      * @throws ServerException the server rejected the message, see ServerException::isRetryable()
      * @throws ResponseVerificationException the response cannot be trusted
      */
@@ -96,7 +96,7 @@ class Dispatcher
         $response = $this->process($receipt, false);
 
         if (!$response->isConfirmed()) {
-            throw new ServerException('The response does not contain a confirmation code.', (int) $response->errorCode, $response);
+            throw new TransportException('The response does not contain a confirmation code.');
         }
 
         return (string) $response->pok;
@@ -294,7 +294,7 @@ class Dispatcher
         $fault = $xpath->query('/s:Envelope/s:Body/s:Fault')->item(0);
         if ($fault !== null) {
             $message = trim($xpath->evaluate('string(faultstring)', $fault));
-            throw new ServerException('SOAP fault: ' . $message, 0);
+            throw new TransportException(sprintf('SOAP fault with HTTP status %d: %s', $http->status, $message));
         }
 
         $answer = $xpath->query('/s:Envelope/s:Body/eet:Odpoved')->item(0);
@@ -306,6 +306,16 @@ class Dispatcher
         $confirmation = $xpath->query('eet:Potvrzeni', $answer)->item(0);
         $error = $xpath->query('eet:Chyba', $answer)->item(0);
 
+        if ($confirmation === null && $error === null) {
+            throw new TransportException('The response contains neither a confirmation nor an error.');
+        }
+
+        // KodChybaType from the XSD. Code 0 means success, so it must not come from an unreadable value.
+        $errorCode = $error === null ? null : trim($error->getAttribute('kod'));
+        if ($errorCode !== null && preg_match('/^[+-]?\d{1,3}$/D', $errorCode) !== 1) {
+            throw new TransportException(sprintf('The response contains an invalid error code: %s', var_export($errorCode, true)));
+        }
+
         $warnings = [];
         foreach ($xpath->query('eet:Varovani', $answer) as $warning) {
             $warnings[(int) $warning->getAttribute('kod_varov')] = trim($warning->textContent);
@@ -316,7 +326,7 @@ class Dispatcher
             $this->attribute($header, 'dat_prij'),
             $this->attribute($header, 'dat_odmit'),
             $this->attribute($confirmation, 'pok'),
-            $error === null ? null : (int) $error->getAttribute('kod'),
+            $errorCode === null ? null : (int) $errorCode,
             $error === null ? null : trim($error->textContent),
             in_array($this->attribute($confirmation ?? $error, 'test'), ['true', '1'], true),
             $warnings,

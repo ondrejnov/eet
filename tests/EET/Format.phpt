@@ -16,7 +16,6 @@ Assert::same('0.56', Format::price('0.56'));
 Assert::same('20.45', Format::price('020.45'));
 Assert::same('0.00', Format::price(0));
 Assert::same('0.00', Format::price(-0.0));
-Assert::same('0.00', Format::price(-0.001));
 Assert::same('0.20', Format::price('.20'));
 Assert::same('-100.00', Format::price('-00100.00'));
 Assert::same('-0.01', Format::price(-0.01));
@@ -28,6 +27,17 @@ Assert::exception(function () { return Format::price(100000000); }, ValidationEx
 Assert::exception(function () { return Format::price(-100000000); }, ValidationException::class);
 Assert::exception(function () { return Format::price(99999999.999); }, ValidationException::class);
 Assert::exception(function () { return Format::price('12,50'); }, ValidationException::class);
+
+// Amounts are never rounded, only trailing zeros and the noise of float arithmetic are accepted.
+foreach ([100.999, '100.999', 12.345, '12.345', -0.004, '-0.004', -0.001, '99999999.994', '100.0000001', '1.5e-3'] as $amount) {
+    Assert::exception(function () use ($amount) { return Format::price($amount); }, ValidationException::class, '~more than two decimals~');
+}
+Assert::same('12.34', Format::price('12.340'));
+Assert::same('12.34', Format::price(' 12.3400'));
+Assert::same('100.00', Format::price('1e2'));
+Assert::same('0.30', Format::price(0.1 + 0.2));
+Assert::same('3.30', Format::price(1.1 * 3));
+Assert::same('300.30', Format::price(100.1 + 200.2));
 Assert::exception(function () { return Format::price('abc'); }, ValidationException::class);
 Assert::exception(function () { return Format::price(''); }, ValidationException::class);
 Assert::exception(function () { return Format::price(NAN); }, ValidationException::class);

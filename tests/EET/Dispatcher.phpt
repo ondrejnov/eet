@@ -162,9 +162,22 @@ $dispatcher = $dispatcherFor($reject(6, 'EIC poplatnika ma chybnou strukturu'));
 Assert::false($dispatcher->check(createReceipt()));
 Assert::same(6, $dispatcher->getLastResponse()->errorCode);
 
-// The response of the verification mode is not a registration.
+// The response of the verification mode is not a registration, the sale has to be sent again.
 $dispatcher = $dispatcherFor($reject(0));
-Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ServerException::class, '~confirmation code~');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, TransportException::class, '~confirmation code~');
+
+// An unreadable error code must not be mistaken for the success code 0.
+foreach (['<v4:Chyba>Internal failure</v4:Chyba>', '<v4:Chyba kod="">x</v4:Chyba>', '<v4:Chyba kod="abc">x</v4:Chyba>', '<v4:Chyba kod="1000">x</v4:Chyba>'] as $chyba) {
+    $dispatcher = $dispatcherFor(new HttpResponse(200, createResponseXml($chyba)));
+    Assert::exception(static function () use ($dispatcher) { return $dispatcher->check(createReceipt()); }, TransportException::class, '~invalid error code~');
+    Assert::null($dispatcher->getLastResponse());
+    Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, TransportException::class, '~invalid error code~');
+}
+
+// A response without any result says nothing about the sale.
+$dispatcher = $dispatcherFor(new HttpResponse(200, createResponseXml('<v4:Hlavicka uuid_zpravy="123e4567-e89b-42d3-a456-426655440000"/>')));
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, TransportException::class, '~neither a confirmation nor an error~');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->check(createReceipt()); }, TransportException::class, '~neither a confirmation nor an error~');
 
 // Confirmations that cannot be trusted keep the data for diagnostics but are refused.
 $dispatcher = $dispatcherFor($confirm('', POK, null, false));
@@ -197,13 +210,14 @@ Assert::exception(
     ResponseVerificationException::class
 );
 
-// SOAP fault.
+// SOAP fault: no POK and no EET error, so the state of the sale is unknown.
 $fault = sprintf(
     '<soapenv:Envelope xmlns:soapenv="%s"><soapenv:Body><soapenv:Fault><faultcode>soapenv:Client</faultcode><faultstring>Bad message</faultstring></soapenv:Fault></soapenv:Body></soapenv:Envelope>',
     Namespaces::SOAP
 );
 $dispatcher = $dispatcherFor(new HttpResponse(500, $fault));
-Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, ServerException::class, 'SOAP fault: Bad message');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->send(createReceipt()); }, TransportException::class, 'SOAP fault with HTTP status 500: Bad message');
+Assert::exception(static function () use ($dispatcher) { return $dispatcher->check(createReceipt()); }, TransportException::class, '~SOAP fault~');
 
 function createResponseXmlWithoutDeclaration(string $content): string
 {
